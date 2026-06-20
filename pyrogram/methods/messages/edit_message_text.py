@@ -31,14 +31,14 @@ class EditMessageText:
         self: "pyrogram.Client",
         chat_id: Union[int, str],
         message_id: int,
-        text: str,
+        text: Optional[str] = None,
         parse_mode: Optional["enums.ParseMode"] = None,
         entities: Optional[List["types.MessageEntity"]] = None,
         link_preview_options: "types.LinkPreviewOptions" = None,
         schedule_date: Optional[datetime] = None,
         business_connection_id: Optional[str] = None,
+        rich_message: Optional["types.InputRichMessage"] = None,
         reply_markup: "types.InlineKeyboardMarkup" = None,
-
         show_caption_above_media: Optional[bool] = None,
         disable_web_page_preview: Optional[bool] = None,
     ) -> "types.Message":
@@ -55,8 +55,9 @@ class EditMessageText:
             message_id (``int``):
                 Message identifier in the chat specified in chat_id.
 
-            text (``str``):
+            text (``str``, *optional*):
                 New text of the message.
+                Required if rich_message isn't specified.
 
             parse_mode (:obj:`~pyrogram.enums.ParseMode`, *optional*):
                 By default, texts are parsed using both Markdown and HTML styles.
@@ -73,6 +74,10 @@ class EditMessageText:
 
             business_connection_id (``str``, *optional*):
                 Unique identifier of the business connection on behalf of which the message will be sent.
+
+            rich_message (:obj:`~pyrogram.types.InputRichMessage`, *optional*):
+                New rich content of the message.
+                Required if text isn't specified.
 
             reply_markup (:obj:`~pyrogram.types.InlineKeyboardMarkup`, *optional*):
                 An InlineKeyboardMarkup object.
@@ -115,6 +120,19 @@ class EditMessageText:
 
         link_preview_options = link_preview_options or self.link_preview_options
 
+        message = ""
+        input_rich_message = None
+        entities = None
+
+        if text:
+            message, entities = (
+                await utils.parse_text_entities(self, text, parse_mode, entities)
+            ).values()
+        elif rich_message:
+            input_rich_message = rich_message.write()
+        else:
+            raise ValueError("Either text or rich_message must be specified")
+
         r = await self.invoke(
             raw.functions.messages.EditMessage(
                 peer=await self.resolve_peer(chat_id),
@@ -133,7 +151,9 @@ class EditMessageText:
                 ),
                 schedule_date=utils.datetime_to_timestamp(schedule_date),
                 reply_markup=await reply_markup.write(self) if reply_markup else None,
-                **await utils.parse_text_entities(self, text, parse_mode, entities),
+                message=message,
+                entities=entities,
+                rich_message=input_rich_message,
             ),
             business_connection_id=business_connection_id,
         )
