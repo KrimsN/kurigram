@@ -694,6 +694,11 @@ def pyrogram_api():
             ChatEventFilter
             ChatMemberUpdated
             ChatJoinRequest
+            ChatJoinResult
+            ChatJoinResultSuccess
+            ChatJoinResultRequestSent
+            ChatJoinResultGuardBotApprovalRequired
+            ChatJoinResultDeclined
             ChatJoiner
             Dialog
             Restriction
