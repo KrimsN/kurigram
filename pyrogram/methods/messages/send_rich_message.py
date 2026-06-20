@@ -108,8 +108,7 @@ class SendRichMessage:
                 from pyrogram.types import (
                     ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton, InputRichMessage)
 
-                # Send an inline keyboard
-                await app.send_message(
+                await app.send_rich_message(
                     chat_id, InputRichMessage(html="Hello <b>World</b>"),
                     reply_markup=InlineKeyboardMarkup(
                         [
