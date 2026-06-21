@@ -105,16 +105,18 @@ class SendRichMessage:
         Example:
             .. code-block:: python
 
-                from pyrogram.types import (
-                    ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton, InputRichMessage)
+                from pyrogram import types
 
                 await app.send_rich_message(
-                    chat_id, InputRichMessage(html="Hello <b>World</b>"),
-                    reply_markup=InlineKeyboardMarkup(
+                    chat_id=chat_id,
+                    rich_message=types.InputRichMessage(html="Hello <b>World</b>"),
+                    reply_markup=types.InlineKeyboardMarkup(
                         [
-                            [InlineKeyboardButton("Data", callback_data="callback_data")],
-                            [InlineKeyboardButton("Docs", url="https://docs.pyrogram.org")]
-                        ]))
+                            [types.InlineKeyboardButton("Data", callback_data="callback_data")],
+                            [types.InlineKeyboardButton("Docs", url="https://docs.pyrogram.org")],
+                        ]
+                    ),
+                )
         """
         r = await self.invoke(
             raw.functions.messages.SendMessage(

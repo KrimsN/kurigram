@@ -470,8 +470,6 @@ class RichBlockListItem(RichBlock):
     async def _parse(
         client, list_item: Union["raw.base.PageListItem", "raw.base.PageListOrderedItem"]
     ):
-        """Парсит PageListItem (как обычный, так и упорядоченный список)"""
-
         if isinstance(list_item, raw.types.PageListItemBlocks):
             blocks = types.List(
                 [await types.RichBlock._parse(client, block) for block in list_item.blocks]

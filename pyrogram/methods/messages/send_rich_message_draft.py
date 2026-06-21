@@ -35,7 +35,7 @@ class SendRichMessageDraft:
         .. note::
 
             The streamed draft is ephemeral and acts as a temporary 30-second preview - once the output is finalized,
-            you must call :meth:`~pyrogram.Client.send_message` with the complete message to persist it in the user's chat.
+            you must call :meth:`~pyrogram.Client.send_rich_message` with the complete message to persist it in the user's chat.
 
         .. include:: /_includes/usable-by/bots.rst
 
