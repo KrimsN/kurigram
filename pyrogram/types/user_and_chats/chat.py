@@ -888,7 +888,7 @@ class Chat(Object):
             profile_color=types.ChatColor._parse_profile_color(user.profile_color),
             paid_message_star_count=user.send_paid_messages_stars,
             can_manage_bots=user.bot_can_manage_bots,
-            community_id=user.linked_community_id,
+            community_id=utils.get_channel_id(user.linked_community_id) if user.linked_community_id is not None else None,
             raw=user,
             client=client,
         )
@@ -1005,7 +1005,7 @@ class Chat(Object):
             has_automatic_translation=channel.autotranslation,
             has_forum_tabs=channel.forum_tabs,
             has_direct_messages_group=channel.broadcast_messages_allowed,
-            community_id=channel.linked_community_id,
+            community_id=utils.get_channel_id(channel.linked_community_id) if channel.linked_community_id is not None else None,
             raw=channel,
             client=client,
         )
