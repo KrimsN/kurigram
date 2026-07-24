@@ -717,6 +717,15 @@ def pyrogram_api():
             GlobalPrivacySettings
             HistoryCleared
             ChatFolderInviteLinkInfo
+            Community
+            CommunityAdministratorRights
+            CommunityMemberStatus
+            CommunityMemberStatusCreator
+            CommunityMemberStatusAdministrator
+            CommunityMemberStatusMember
+            CommunityMemberStatusLeft
+            CommunityMemberStatusBanned
+            CommunityPermissions
         """,
         messages_media="""
         Messages & Media
@@ -859,6 +868,8 @@ def pyrogram_api():
             ChecklistTask
             ChecklistTasksAdded
             ChecklistTasksDone
+            CommunityChatAdded
+            CommunityChatRemoved
             Checklist
             RefundedPayment
             ReplyParameters
