@@ -552,6 +552,11 @@ def pyrogram_api():
             get_managed_bot_token
             replace_managed_bot_token
             get_owned_bots
+            delete_ephemeral_message
+            edit_ephemeral_message_text
+            edit_ephemeral_message_media
+            edit_ephemeral_message_caption
+            edit_ephemeral_message_reply_markup
         """,
         business="""
         Business

@@ -69,7 +69,9 @@ class Message(Object, Update):
 
     Parameters:
         id (``int``):
-            Unique message identifier inside this chat.
+            Unique message identifier inside this chat, 0 for ephemeral messages.
+            In specific instances (e.g., a message containing a video sent to a big chat), the server might automatically schedule a message instead of sending it immediately.
+            In such cases, this message will be unusable until it is actually sent.
 
         from_user (:obj:`~pyrogram.types.User`, *optional*):
             Sender, empty for messages sent to channels.
@@ -89,6 +91,13 @@ class Message(Object, Update):
         sender_tag (``str``, *optional*):
             Tag or custom title of the sender of the message.
             For supergroups only.
+
+        receiver_user (:obj:`~pyrogram.types.User`, *optional*):
+            For ephemeral messages, the user who received the message.
+
+        ephemeral_message_id (``int``, *optional*):
+            For ephemeral messages, identifier of the ephemeral message inside this chat.
+            The identifier may be reused for another ephemeral message after the message is deleted or expires.
 
         date (:py:obj:`~datetime.datetime`, *optional*):
             Date the message was sent.
@@ -632,6 +641,8 @@ class Message(Object, Update):
         sender_boost_count: Optional[int] = None,
         sender_business_bot: Optional["types.User"] = None,
         sender_tag: Optional[str] = None,
+        receiver_user: Optional["types.User"] = None,
+        ephemeral_message_id: Optional[int] = None,
         date: Optional[datetime] = None,
         guest_query_id: Optional[str] = None,
         chat: Optional["types.Chat"] = None,
@@ -808,6 +819,8 @@ class Message(Object, Update):
         self.sender_boost_count = sender_boost_count
         self.sender_business_bot = sender_business_bot
         self.sender_tag = sender_tag
+        self.receiver_user = receiver_user
+        self.ephemeral_message_id = ephemeral_message_id
         self.date = date
         self.guest_query_id = guest_query_id
         self.chat = chat
@@ -1870,6 +1883,305 @@ class Message(Object, Update):
         return parsed_message
 
     @staticmethod
+    async def _parse_ephemeral_message(
+        client: "pyrogram.Client",
+        message: "raw.types.EphemeralMessage",
+        users: Dict[int, "raw.base.User"],
+        chats: Dict[int, "raw.base.Chat"],
+        replies: int = 1,
+    ) -> "Message":
+        from_id = utils.get_raw_peer_id(message.from_id)
+        peer_id = utils.get_raw_peer_id(message.peer_id)
+
+        if isinstance(message.from_id, raw.types.PeerUser) and isinstance(message.peer_id, raw.types.PeerUser):
+            if from_id not in users or peer_id not in users:
+                try:
+                    r = await client.invoke(
+                        raw.functions.users.GetUsers(
+                            id=[
+                                await client.resolve_peer(from_id),
+                                await client.resolve_peer(peer_id)
+                            ]
+                        )
+                    )
+                except PeerIdInvalid:
+                    pass
+                else:
+                    users.update({i.id: i for i in r})
+
+        from_user = types.User._parse(client, users.get(from_id or peer_id))
+        sender_chat = types.Chat._parse(client, message, users, chats, is_chat=False) if not from_user else None
+        chat = types.Chat._parse(client, message, users, chats, is_chat=True)
+
+        entities = types.List(
+            filter(
+                lambda x: x is not None,
+                [types.MessageEntity._parse(client, entity, users) for entity in message.entities]
+            )
+        )
+
+        photo = None
+        live_photo = None
+        location = None
+        contact = None
+        venue = None
+        game = None
+        giveaway = None
+        giveaway_winners = None
+        invoice = None
+        story = None
+        audio = None
+        voice = None
+        animation = None
+        video = None
+        video_note = None
+        sticker = None
+        document = None
+        web_page = None
+        link_preview_options = None
+        poll = None
+        dice = None
+        paid_media = None
+        checklist = None
+
+        media = message.media
+        media_type = None
+        has_media_spoiler = None
+
+        if media:
+            if isinstance(media, raw.types.MessageMediaPhoto):
+                if media.live_photo:
+                    doc = media.video
+
+                    if isinstance(doc, raw.types.Document):
+                        attributes = {type(i): i for i in doc.attributes}
+
+                        if raw.types.DocumentAttributeVideo in attributes:
+                            video_attributes = attributes[raw.types.DocumentAttributeVideo]
+
+                            live_photo = types.LivePhoto._parse(client, doc, video_attributes)
+
+                    media_type = enums.MessageMediaType.LIVE_PHOTO
+                else:
+                    media_type = enums.MessageMediaType.PHOTO
+
+                photo = types.Photo._parse(client, media.photo, media.ttl_seconds)
+                has_media_spoiler = media.spoiler
+            elif isinstance(media, raw.types.MessageMediaGeo):
+                location = types.Location._parse(media.geo)
+                media_type = enums.MessageMediaType.LOCATION
+            elif isinstance(media, raw.types.MessageMediaGeoLive):
+                location = types.Location._parse_media(media)
+                media_type = enums.MessageMediaType.LOCATION
+            elif isinstance(media, raw.types.MessageMediaContact):
+                contact = types.Contact._parse(client, media)
+                media_type = enums.MessageMediaType.CONTACT
+            elif isinstance(media, raw.types.MessageMediaVenue):
+                venue = types.Venue._parse(client, media)
+                media_type = enums.MessageMediaType.VENUE
+            elif isinstance(media, raw.types.MessageMediaGame):
+                game = types.Game._parse(client, media)
+                media_type = enums.MessageMediaType.GAME
+            elif isinstance(media, raw.types.MessageMediaGiveaway):
+                giveaway = types.Giveaway._parse(client, media, chats)
+                media_type = enums.MessageMediaType.GIVEAWAY
+            elif isinstance(media, raw.types.MessageMediaGiveawayResults):
+                giveaway_winners = await types.GiveawayWinners._parse(client, media, users, chats)
+                media_type = enums.MessageMediaType.GIVEAWAY_WINNERS
+            elif isinstance(media, raw.types.MessageMediaInvoice):
+                invoice = types.Invoice._parse(client, media)
+                media_type = enums.MessageMediaType.INVOICE
+            elif isinstance(media, raw.types.MessageMediaStory):
+                story = await types.Story._parse(client, media, media.peer, users, chats)
+                media_type = enums.MessageMediaType.STORY
+            elif isinstance(media, raw.types.MessageMediaDocument):
+                doc = media.document
+                has_media_spoiler = media.spoiler
+
+                if isinstance(doc, raw.types.Document):
+                    attributes = {type(i): i for i in doc.attributes}
+
+                    file_name = getattr(
+                        attributes.get(
+                            raw.types.DocumentAttributeFilename, None
+                        ), "file_name", None
+                    )
+
+                    if raw.types.DocumentAttributeAnimated in attributes:
+                        video_attributes = attributes.get(raw.types.DocumentAttributeVideo, None)
+
+                        if video_attributes and video_attributes.round_message:
+                            video_note = types.VideoNote._parse(client, doc, video_attributes, media.ttl_seconds)
+                            media_type = enums.MessageMediaType.VIDEO_NOTE
+                        else:
+                            animation = types.Animation._parse(client, doc, video_attributes, file_name)
+                            media_type = enums.MessageMediaType.ANIMATION
+                    elif raw.types.DocumentAttributeSticker in attributes:
+                        sticker = await types.Sticker._parse(client, doc, attributes)
+                        media_type = enums.MessageMediaType.STICKER
+                    elif raw.types.DocumentAttributeVideo in attributes:
+                        video_attributes = attributes[raw.types.DocumentAttributeVideo]
+
+                        if video_attributes.round_message:
+                            video_note = types.VideoNote._parse(client, doc, video_attributes, media.ttl_seconds)
+                            media_type = enums.MessageMediaType.VIDEO_NOTE
+                        else:
+                            video = types.Video._parse(client, doc, video_attributes, file_name, media.ttl_seconds, media.video_cover, media.video_timestamp, media.alt_documents)
+                            media_type = enums.MessageMediaType.VIDEO
+                    elif raw.types.DocumentAttributeAudio in attributes:
+                        audio_attributes = attributes[raw.types.DocumentAttributeAudio]
+
+                        if audio_attributes.voice:
+                            voice = types.Voice._parse(client, doc, audio_attributes, media.ttl_seconds)
+                            media_type = enums.MessageMediaType.VOICE
+                        else:
+                            audio = types.Audio._parse(client, doc, audio_attributes, file_name)
+                            media_type = enums.MessageMediaType.AUDIO
+                    else:
+                        document = types.Document._parse(client, doc, file_name)
+                        media_type = enums.MessageMediaType.DOCUMENT
+            elif isinstance(media, raw.types.MessageMediaWebPage):
+                media_type = enums.MessageMediaType.WEB_PAGE
+                web_page = types.WebPage._parse(client, media)
+            elif isinstance(media, raw.types.MessageMediaPoll):
+                poll = await types.Poll._parse(
+                    client,
+                    media,
+                    description=types.FormattedText._parse(
+                        client,
+                        raw.types.TextWithEntities(
+                            text=message.message,
+                            entities=message.entities
+                        )
+                    )  if message.message else None,
+                    users=users,
+                    chats=chats
+                )
+                media_type = enums.MessageMediaType.POLL
+            elif isinstance(media, raw.types.MessageMediaDice):
+                dice = types.Dice._parse(client, media)
+                media_type = enums.MessageMediaType.DICE
+            elif isinstance(media, raw.types.MessageMediaPaidMedia):
+                paid_media = types.PaidMediaInfo._parse(client, media)
+                media_type = enums.MessageMediaType.PAID_MEDIA
+            elif isinstance(media, raw.types.MessageMediaToDo):
+                media_type = enums.MessageMediaType.CHECKLIST
+                checklist = types.Checklist._parse(client, media, users, chats)
+            else:
+                media_type = enums.MessageMediaType.UNSUPPORTED
+                media = None
+
+        link_preview_options = types.LinkPreviewOptions._parse(
+            media,
+            getattr(getattr(media, "webpage", None), "url", utils.get_first_url(message.message)),
+        )
+
+        reply_markup = message.reply_markup
+
+        if reply_markup:
+            if isinstance(reply_markup, raw.types.ReplyKeyboardForceReply):
+                reply_markup = types.ForceReply.read(reply_markup)
+            elif isinstance(reply_markup, raw.types.ReplyKeyboardMarkup):
+                reply_markup = types.ReplyKeyboardMarkup.read(reply_markup)
+            elif isinstance(reply_markup, raw.types.ReplyInlineMarkup):
+                reply_markup = types.InlineKeyboardMarkup.read(reply_markup)
+            elif isinstance(reply_markup, raw.types.ReplyKeyboardHide):
+                reply_markup = types.ReplyKeyboardRemove.read(reply_markup)
+            else:
+                reply_markup = None
+
+        parsed_message = Message(
+            id=0,
+            ephemeral_message_id=message.id,
+            date=utils.timestamp_to_datetime(message.date),
+            chat=chat,
+            from_user=from_user,
+            sender_chat=sender_chat,
+            receiver_user=types.User._parse(client, users.get(message.receiver_id)),
+            text=(
+                Str(message.message).init(entities) or None
+                if media is None or web_page is not None
+                else None
+            ),
+            caption=(
+                Str(message.message).init(entities) or None
+                if media is not None and web_page is None
+                else None
+            ),
+            entities=(
+                entities or None
+                if media is None or web_page is not None
+                else None
+            ),
+            caption_entities=(
+                entities or None
+                if media is not None and web_page is None
+                else None
+            ),
+            has_media_spoiler=has_media_spoiler,
+            media=media_type,
+            paid_media=paid_media,
+            checklist=checklist,
+            photo=photo,
+            live_photo=live_photo,
+            location=location,
+            contact=contact,
+            venue=venue,
+            audio=audio,
+            voice=voice,
+            animation=animation,
+            game=game,
+            giveaway=giveaway,
+            giveaway_winners=giveaway_winners,
+            invoice=invoice,
+            story=story,
+            video=video,
+            video_note=video_note,
+            sticker=sticker,
+            document=document,
+            web_page=web_page,
+            link_preview_options=link_preview_options,
+            poll=poll,
+            dice=dice,
+            outgoing=message.out,
+            reply_markup=reply_markup,
+            raw=message,
+            client=client
+        )
+
+        if message.reply_to:
+            parsed_message = await types.Message.__parse_reply(
+                client=client,
+                parsed_message=parsed_message,
+                message=message,
+                users=users,
+                chats=chats,
+                replies=replies
+            )
+
+        if not parsed_message.topic and parsed_message.chat.is_forum:
+            parsed_topic = client.topic_cache[(parsed_message.chat.id, parsed_message.message_thread_id)]
+
+            if parsed_topic:
+                parsed_message.topic = parsed_topic
+            elif client.fetch_topics and client.me and not client.me.is_bot:
+                try:
+                    parsed_message.topic = await client.get_forum_topics_by_id(
+                        chat_id=parsed_message.chat.id,
+                        topic_ids=parsed_message.message_thread_id or 1
+                    )
+
+                    if parsed_message.topic:
+                        client.topic_cache[(parsed_message.chat.id, parsed_message.topic.id)] = parsed_message.topic
+                except (ChannelPrivate, ChannelForumMissing):
+                    pass
+
+        if not parsed_message.poll:  # Do not cache poll messages
+            client.message_cache[(parsed_message.chat.id, parsed_message.id)] = parsed_message
+
+        return parsed_message
+
+    @staticmethod
     async def __parse_reply(
         client: "pyrogram.Client",
         parsed_message: "Message",
@@ -1995,6 +2307,16 @@ class Message(Object, Update):
                 raw_reply_to_message=raw_reply_to_message
             )
 
+        if isinstance(message, raw.types.EphemeralMessage):
+            return await types.Message._parse_ephemeral_message(
+                client=client,
+                message=message,
+                users=users,
+                chats=chats,
+                replies=replies,
+            )
+
+
     @property
     def link(self) -> str:
         if self.chat.type in (enums.ChatType.PRIVATE, enums.ChatType.BOT):
@@ -2104,6 +2426,7 @@ class Message(Object, Update):
         ] = None,
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
+        receiver_user_id: Optional[Union[int, str]] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -2172,7 +2495,13 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
+
+            receiver_user_id (``int`` | ``str``, *optional*):
+                For outgoing ephemeral messages, unique identifier (int) or username (str) of the user who will receive the message.
+                For group and supergroup chats only.
+                It is not guaranteed that the user will receive the message, especially if they are offline.
+                See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -2268,6 +2597,7 @@ class Message(Object, Update):
             disable_notification=disable_notification,
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
+            receiver_user_id=receiver_user_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -2311,6 +2641,7 @@ class Message(Object, Update):
         ] = None,
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
+        receiver_user_id: Optional[Union[int, str]] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -2373,7 +2704,13 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
+
+            receiver_user_id (``int`` | ``str``, *optional*):
+                For outgoing ephemeral messages, unique identifier (int) or username (str) of the user who will receive the message.
+                For group and supergroup chats only.
+                It is not guaranteed that the user will receive the message, especially if they are offline.
+                See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -2455,6 +2792,7 @@ class Message(Object, Update):
             disable_notification=disable_notification,
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
+            receiver_user_id=receiver_user_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -2481,6 +2819,7 @@ class Message(Object, Update):
         disable_notification: Optional[bool] = None,
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
+        receiver_user_id: Optional[Union[int, str]] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -2554,7 +2893,13 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
+
+            receiver_user_id (``int`` | ``str``, *optional*):
+                For outgoing ephemeral messages, unique identifier (int) or username (str) of the user who will receive the message.
+                For group and supergroup chats only.
+                It is not guaranteed that the user will receive the message, especially if they are offline.
+                See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -2648,6 +2993,7 @@ class Message(Object, Update):
             disable_notification=disable_notification,
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
+            receiver_user_id=receiver_user_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -2678,6 +3024,7 @@ class Message(Object, Update):
         disable_notification: Optional[bool] = None,
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
+        receiver_user_id: Optional[Union[int, str]] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -2745,7 +3092,13 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
+
+            receiver_user_id (``int`` | ``str``, *optional*):
+                For outgoing ephemeral messages, unique identifier (int) or username (str) of the user who will receive the message.
+                For group and supergroup chats only.
+                It is not guaranteed that the user will receive the message, especially if they are offline.
+                See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -2825,6 +3178,7 @@ class Message(Object, Update):
             disable_notification=disable_notification,
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
+            receiver_user_id=receiver_user_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -2847,6 +3201,7 @@ class Message(Object, Update):
         disable_notification: Optional[bool] = None,
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
+        receiver_user_id: Optional[Union[int, str]] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         allow_paid_broadcast: Optional[bool] = None,
@@ -2897,7 +3252,13 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
+
+            receiver_user_id (``int`` | ``str``, *optional*):
+                For outgoing ephemeral messages, unique identifier (int) or username (str) of the user who will receive the message.
+                For group and supergroup chats only.
+                It is not guaranteed that the user will receive the message, especially if they are offline.
+                See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -2954,6 +3315,7 @@ class Message(Object, Update):
             disable_notification=disable_notification,
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
+            receiver_user_id=receiver_user_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             business_connection_id=self.business_connection_id,
@@ -2976,6 +3338,7 @@ class Message(Object, Update):
         disable_notification: Optional[bool] = None,
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
+        receiver_user_id: Optional[Union[int, str]] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         allow_paid_broadcast: Optional[bool] = None,
@@ -3019,7 +3382,13 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
+
+            receiver_user_id (``int`` | ``str``, *optional*):
+                For outgoing ephemeral messages, unique identifier (int) or username (str) of the user who will receive the message.
+                For group and supergroup chats only.
+                It is not guaranteed that the user will receive the message, especially if they are offline.
+                See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -3062,6 +3431,7 @@ class Message(Object, Update):
             disable_notification=disable_notification,
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
+            receiver_user_id=receiver_user_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             business_connection_id=self.business_connection_id,
@@ -3082,6 +3452,7 @@ class Message(Object, Update):
         disable_notification: Optional[bool] = None,
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
+        receiver_user_id: Optional[Union[int, str]] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -3156,7 +3527,13 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
+
+            receiver_user_id (``int`` | ``str``, *optional*):
+                For outgoing ephemeral messages, unique identifier (int) or username (str) of the user who will receive the message.
+                For group and supergroup chats only.
+                It is not guaranteed that the user will receive the message, especially if they are offline.
+                See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -3252,6 +3629,7 @@ class Message(Object, Update):
             disable_notification=disable_notification,
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
+            receiver_user_id=receiver_user_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -3282,6 +3660,7 @@ class Message(Object, Update):
         disable_notification: Optional[bool] = None,
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
+        receiver_user_id: Optional[Union[int, str]] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -3350,7 +3729,13 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
+
+            receiver_user_id (``int`` | ``str``, *optional*):
+                For outgoing ephemeral messages, unique identifier (int) or username (str) of the user who will receive the message.
+                For group and supergroup chats only.
+                It is not guaranteed that the user will receive the message, especially if they are offline.
+                See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -3432,6 +3817,7 @@ class Message(Object, Update):
             disable_notification=disable_notification,
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
+            receiver_user_id=receiver_user_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -3756,7 +4142,7 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only only.
+                For direct chats only.only.
 
             suggested_post_parameters (:obj:`~pyrogram.types.SuggestedPostParameters`, *optional*):
                 Information about the suggested post.
@@ -3969,7 +4355,7 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only only.
+                For direct chats only.only.
 
             suggested_post_parameters (:obj:`~pyrogram.types.SuggestedPostParameters`, *optional*):
                 Information about the suggested post.
@@ -4051,6 +4437,7 @@ class Message(Object, Update):
         disable_notification: Optional[bool] = None,
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
+        receiver_user_id: Optional[Union[int, str]] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         allow_paid_broadcast: Optional[bool] = None,
@@ -4110,7 +4497,13 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
+
+            receiver_user_id (``int`` | ``str``, *optional*):
+                For outgoing ephemeral messages, unique identifier (int) or username (str) of the user who will receive the message.
+                For group and supergroup chats only.
+                It is not guaranteed that the user will receive the message, especially if they are offline.
+                See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -4169,6 +4562,7 @@ class Message(Object, Update):
             disable_notification=disable_notification,
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
+            receiver_user_id=receiver_user_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             business_connection_id=self.business_connection_id,
@@ -4192,6 +4586,7 @@ class Message(Object, Update):
         disable_notification: Optional[bool] = None,
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
+        receiver_user_id: Optional[Union[int, str]] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         allow_paid_broadcast: Optional[bool] = None,
@@ -4245,7 +4640,13 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
+
+            receiver_user_id (``int`` | ``str``, *optional*):
+                For outgoing ephemeral messages, unique identifier (int) or username (str) of the user who will receive the message.
+                For group and supergroup chats only.
+                It is not guaranteed that the user will receive the message, especially if they are offline.
+                See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -4290,6 +4691,7 @@ class Message(Object, Update):
             disable_notification=disable_notification,
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
+            receiver_user_id=receiver_user_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             business_connection_id=self.business_connection_id,
@@ -4339,7 +4741,7 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -4436,7 +4838,7 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -4489,6 +4891,7 @@ class Message(Object, Update):
         disable_notification: Optional[bool] = None,
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
+        receiver_user_id: Optional[Union[int, str]] = None,
         effect_id: Optional[int] = None,
         show_caption_above_media: Optional[bool] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
@@ -4545,7 +4948,13 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
+
+            receiver_user_id (``int`` | ``str``, *optional*):
+                For outgoing ephemeral messages, unique identifier (int) or username (str) of the user who will receive the message.
+                For group and supergroup chats only.
+                It is not guaranteed that the user will receive the message, especially if they are offline.
+                See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -4617,6 +5026,7 @@ class Message(Object, Update):
             disable_notification=disable_notification,
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
+            receiver_user_id=receiver_user_id,
             effect_id=effect_id,
             show_caption_above_media=show_caption_above_media,
             reply_parameters=reply_parameters,
@@ -4646,6 +5056,7 @@ class Message(Object, Update):
         disable_notification: Optional[bool] = None,
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
+        receiver_user_id: Optional[Union[int, str]] = None,
         effect_id: Optional[int] = None,
         show_caption_above_media: Optional[bool] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
@@ -4695,7 +5106,13 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
+
+            receiver_user_id (``int`` | ``str``, *optional*):
+                For outgoing ephemeral messages, unique identifier (int) or username (str) of the user who will receive the message.
+                For group and supergroup chats only.
+                It is not guaranteed that the user will receive the message, especially if they are offline.
+                See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -4753,6 +5170,7 @@ class Message(Object, Update):
             disable_notification=disable_notification,
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
+            receiver_user_id=receiver_user_id,
             effect_id=effect_id,
             show_caption_above_media=show_caption_above_media,
             reply_parameters=reply_parameters,
@@ -4778,6 +5196,7 @@ class Message(Object, Update):
         disable_notification: Optional[bool] = None,
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
+        receiver_user_id: Optional[Union[int, str]] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -4849,7 +5268,13 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
+
+            receiver_user_id (``int`` | ``str``, *optional*):
+                For outgoing ephemeral messages, unique identifier (int) or username (str) of the user who will receive the message.
+                For group and supergroup chats only.
+                It is not guaranteed that the user will receive the message, especially if they are offline.
+                See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -4949,6 +5374,7 @@ class Message(Object, Update):
             disable_notification=disable_notification,
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
+            receiver_user_id=receiver_user_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -4980,6 +5406,7 @@ class Message(Object, Update):
         disable_notification: Optional[bool] = None,
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
+        receiver_user_id: Optional[Union[int, str]] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -5045,7 +5472,13 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
+
+            receiver_user_id (``int`` | ``str``, *optional*):
+                For outgoing ephemeral messages, unique identifier (int) or username (str) of the user who will receive the message.
+                For group and supergroup chats only.
+                It is not guaranteed that the user will receive the message, especially if they are offline.
+                See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -5131,6 +5564,7 @@ class Message(Object, Update):
             disable_notification=disable_notification,
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
+            receiver_user_id=receiver_user_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -5610,7 +6044,7 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only only.
+                For direct chats only.only.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -5716,7 +6150,7 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only only.
+                For direct chats only.only.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -5780,6 +6214,7 @@ class Message(Object, Update):
         disable_notification: Optional[bool] = None,
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
+        receiver_user_id: Optional[Union[int, str]] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -5841,7 +6276,13 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
+
+            receiver_user_id (``int`` | ``str``, *optional*):
+                For outgoing ephemeral messages, unique identifier (int) or username (str) of the user who will receive the message.
+                For group and supergroup chats only.
+                It is not guaranteed that the user will receive the message, especially if they are offline.
+                See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -5932,6 +6373,7 @@ class Message(Object, Update):
             disable_notification=disable_notification,
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
+            receiver_user_id=receiver_user_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -5959,6 +6401,7 @@ class Message(Object, Update):
         disable_notification: Optional[bool] = None,
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
+        receiver_user_id: Optional[Union[int, str]] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -6014,7 +6457,13 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
+
+            receiver_user_id (``int`` | ``str``, *optional*):
+                For outgoing ephemeral messages, unique identifier (int) or username (str) of the user who will receive the message.
+                For group and supergroup chats only.
+                It is not guaranteed that the user will receive the message, especially if they are offline.
+                See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -6091,6 +6540,7 @@ class Message(Object, Update):
             disable_notification=disable_notification,
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
+            receiver_user_id=receiver_user_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -6115,6 +6565,7 @@ class Message(Object, Update):
         disable_notification: Optional[bool] = None,
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
+        receiver_user_id: Optional[Union[int, str]] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         allow_paid_broadcast: Optional[bool] = None,
@@ -6172,7 +6623,13 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
+
+            receiver_user_id (``int`` | ``str``, *optional*):
+                For outgoing ephemeral messages, unique identifier (int) or username (str) of the user who will receive the message.
+                For group and supergroup chats only.
+                It is not guaranteed that the user will receive the message, especially if they are offline.
+                See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -6231,6 +6688,7 @@ class Message(Object, Update):
             disable_notification=disable_notification,
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
+            receiver_user_id=receiver_user_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             business_connection_id=self.business_connection_id,
@@ -6255,6 +6713,7 @@ class Message(Object, Update):
         disable_notification: Optional[bool] = None,
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
+        receiver_user_id: Optional[Union[int, str]] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         allow_paid_broadcast: Optional[bool] = None,
@@ -6305,7 +6764,13 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
+
+            receiver_user_id (``int`` | ``str``, *optional*):
+                For outgoing ephemeral messages, unique identifier (int) or username (str) of the user who will receive the message.
+                For group and supergroup chats only.
+                It is not guaranteed that the user will receive the message, especially if they are offline.
+                See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -6350,6 +6815,7 @@ class Message(Object, Update):
             disable_notification=disable_notification,
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
+            receiver_user_id=receiver_user_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             business_connection_id=self.business_connection_id,
@@ -6378,6 +6844,7 @@ class Message(Object, Update):
         disable_notification: Optional[bool] = None,
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
+        receiver_user_id: Optional[Union[int, str]] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -6480,7 +6947,13 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
+
+            receiver_user_id (``int`` | ``str``, *optional*):
+                For outgoing ephemeral messages, unique identifier (int) or username (str) of the user who will receive the message.
+                For group and supergroup chats only.
+                It is not guaranteed that the user will receive the message, especially if they are offline.
+                See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -6585,6 +7058,7 @@ class Message(Object, Update):
             disable_notification=disable_notification,
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
+            receiver_user_id=receiver_user_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -6623,6 +7097,7 @@ class Message(Object, Update):
         disable_notification: Optional[bool] = None,
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
+        receiver_user_id: Optional[Union[int, str]] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -6719,7 +7194,13 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
+
+            receiver_user_id (``int`` | ``str``, *optional*):
+                For outgoing ephemeral messages, unique identifier (int) or username (str) of the user who will receive the message.
+                For group and supergroup chats only.
+                It is not guaranteed that the user will receive the message, especially if they are offline.
+                See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -6810,6 +7291,7 @@ class Message(Object, Update):
             disable_notification=disable_notification,
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
+            receiver_user_id=receiver_user_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -6833,6 +7315,7 @@ class Message(Object, Update):
         disable_notification: Optional[bool] = None,
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
+        receiver_user_id: Optional[Union[int, str]] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -6896,7 +7379,13 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
+
+            receiver_user_id (``int`` | ``str``, *optional*):
+                For outgoing ephemeral messages, unique identifier (int) or username (str) of the user who will receive the message.
+                For group and supergroup chats only.
+                It is not guaranteed that the user will receive the message, especially if they are offline.
+                See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -6993,6 +7482,7 @@ class Message(Object, Update):
             disable_notification=disable_notification,
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
+            receiver_user_id=receiver_user_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -7022,6 +7512,7 @@ class Message(Object, Update):
         disable_notification: Optional[bool] = None,
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
+        receiver_user_id: Optional[Union[int, str]] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -7078,7 +7569,13 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
+
+            receiver_user_id (``int`` | ``str``, *optional*):
+                For outgoing ephemeral messages, unique identifier (int) or username (str) of the user who will receive the message.
+                For group and supergroup chats only.
+                It is not guaranteed that the user will receive the message, especially if they are offline.
+                See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -7161,6 +7658,7 @@ class Message(Object, Update):
             disable_notification=disable_notification,
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
+            receiver_user_id=receiver_user_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -7186,6 +7684,7 @@ class Message(Object, Update):
         disable_notification: Optional[bool] = None,
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
+        receiver_user_id: Optional[Union[int, str]] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -7248,7 +7747,13 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
+
+            receiver_user_id (``int`` | ``str``, *optional*):
+                For outgoing ephemeral messages, unique identifier (int) or username (str) of the user who will receive the message.
+                For group and supergroup chats only.
+                It is not guaranteed that the user will receive the message, especially if they are offline.
+                See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -7343,6 +7848,7 @@ class Message(Object, Update):
             disable_notification=disable_notification,
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
+            receiver_user_id=receiver_user_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -7371,6 +7877,7 @@ class Message(Object, Update):
         disable_notification: Optional[bool] = None,
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
+        receiver_user_id: Optional[Union[int, str]] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -7427,7 +7934,13 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
+
+            receiver_user_id (``int`` | ``str``, *optional*):
+                For outgoing ephemeral messages, unique identifier (int) or username (str) of the user who will receive the message.
+                For group and supergroup chats only.
+                It is not guaranteed that the user will receive the message, especially if they are offline.
+                See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -7508,6 +8021,7 @@ class Message(Object, Update):
             disable_notification=disable_notification,
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
+            receiver_user_id=receiver_user_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -7573,7 +8087,7 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only only.
+                For direct chats only.only.
 
             reply_parameters (:obj:`~pyrogram.types.ReplyParameters`, *optional*):
                 Describes reply parameters for the message that is being sent.
@@ -7670,7 +8184,7 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only only.
+                For direct chats only.only.
 
             reply_parameters (:obj:`~pyrogram.types.ReplyParameters`, *optional*):
                 Describes reply parameters for the message that is being sent.
@@ -7771,7 +8285,7 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
 
             reply_parameters (:obj:`~pyrogram.types.ReplyParameters`, *optional*):
                 Describes reply parameters for the message that is being sent.
@@ -7893,7 +8407,7 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
 
             reply_parameters (:obj:`~pyrogram.types.ReplyParameters`, *optional*):
                 Describes reply parameters for the message that is being sent.
@@ -8026,7 +8540,7 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
 
             reply_parameters (:obj:`~pyrogram.types.ReplyParameters`, *optional*):
                 Describes reply parameters for the message that is being sent.
@@ -8109,7 +8623,7 @@ class Message(Object, Update):
 
             direct_messages_topic_id (``int``, *optional*):
                 Unique identifier of the topic in a channel direct messages chat administered by the current user.
-                For directs only.
+                For direct chats only.
 
             reply_parameters (:obj:`~pyrogram.types.ReplyParameters`, *optional*):
                 Describes reply parameters for the message that is being sent.
@@ -9051,10 +9565,12 @@ class Message(Object, Update):
         )
 
     async def delete(self, revoke: bool = True):
-        """Shortcut for method :obj:`~pyrogram.Client.delete_messages` will automatically fill method attributes:
+        """Shortcut for method :obj:`~pyrogram.Client.delete_messages` and :obj:`~pyrogram.Client.delete_ephemeral_message` will automatically fill method attributes:
 
         * chat_id
         * message_ids
+        * ephemeral_message_id
+        * receiver_user_id
 
         Parameters:
             revoke (``bool``, *optional*):
@@ -9069,11 +9585,18 @@ class Message(Object, Update):
         Raises:
             RPCError: In case of a Telegram RPC error.
         """
-        r = await self._client.delete_messages(
-            chat_id=self.chat.id,
-            message_ids=self.id,
-            revoke=revoke
-        )
+        if self.ephemeral_message_id:
+            r = await self._client.delete_ephemeral_message(
+                chat_id=self.chat.id,
+                receiver_user_id=self.receiver_user.id,
+                ephemeral_message_id=self.ephemeral_message_id
+            )
+        else:
+            r = await self._client.delete_messages(
+                chat_id=self.chat.id,
+                message_ids=self.id,
+                revoke=revoke
+            )
 
         return bool(r)
 
