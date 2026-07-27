@@ -37,6 +37,7 @@ class SendContact:
         message_thread_id: int = None,
         direct_messages_topic_id: int = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: int = None,
         reply_parameters: "types.ReplyParameters" = None,
         suggested_post_parameters: "types.SuggestedPostParameters" = None,
@@ -98,6 +99,9 @@ class SendContact:
                 For group and supergroup chats only.
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
+
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -192,6 +196,7 @@ class SendContact:
             rpc = raw.functions.ephemeral.SendMessage(
                 peer=await self.resolve_peer(chat_id),
                 receiver_id=await self.resolve_peer(receiver_user_id),
+                query_id=int(callback_query_id) if callback_query_id is not None else None,
                 media=raw.types.InputMediaContact(
                     phone_number=phone_number,
                     first_name=first_name,

@@ -38,6 +38,7 @@ class SendMessage:
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: Optional[int] = None,
         show_caption_above_media: Optional[bool] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
@@ -103,6 +104,9 @@ class SendMessage:
                 For group and supergroup chats only.
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
+
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -277,6 +281,7 @@ class SendMessage:
             rpc = raw.functions.ephemeral.SendMessage(
                 peer=peer,
                 receiver_id=await self.resolve_peer(receiver_user_id),
+                query_id=int(callback_query_id) if callback_query_id is not None else None,
                 reply_to=await utils.get_reply_to(
                     self,
                     reply_parameters,

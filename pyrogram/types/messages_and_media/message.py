@@ -2427,6 +2427,7 @@ class Message(Object, Update):
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -2502,6 +2503,9 @@ class Message(Object, Update):
                 For group and supergroup chats only.
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
+
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -2598,6 +2602,7 @@ class Message(Object, Update):
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
             receiver_user_id=receiver_user_id,
+            callback_query_id=callback_query_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -2642,6 +2647,7 @@ class Message(Object, Update):
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -2711,6 +2717,9 @@ class Message(Object, Update):
                 For group and supergroup chats only.
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
+
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -2793,6 +2802,7 @@ class Message(Object, Update):
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
             receiver_user_id=receiver_user_id,
+            callback_query_id=callback_query_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -2820,6 +2830,7 @@ class Message(Object, Update):
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -2900,6 +2911,9 @@ class Message(Object, Update):
                 For group and supergroup chats only.
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
+
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -2994,6 +3008,7 @@ class Message(Object, Update):
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
             receiver_user_id=receiver_user_id,
+            callback_query_id=callback_query_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -3025,6 +3040,7 @@ class Message(Object, Update):
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -3099,6 +3115,9 @@ class Message(Object, Update):
                 For group and supergroup chats only.
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
+
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -3179,6 +3198,7 @@ class Message(Object, Update):
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
             receiver_user_id=receiver_user_id,
+            callback_query_id=callback_query_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -3202,6 +3222,7 @@ class Message(Object, Update):
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         allow_paid_broadcast: Optional[bool] = None,
@@ -3260,6 +3281,9 @@ class Message(Object, Update):
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
+
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
                 For private chats only.
@@ -3316,6 +3340,7 @@ class Message(Object, Update):
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
             receiver_user_id=receiver_user_id,
+            callback_query_id=callback_query_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             business_connection_id=self.business_connection_id,
@@ -3339,6 +3364,7 @@ class Message(Object, Update):
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         allow_paid_broadcast: Optional[bool] = None,
@@ -3390,6 +3416,9 @@ class Message(Object, Update):
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
+
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
                 For private chats only.
@@ -3432,6 +3461,7 @@ class Message(Object, Update):
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
             receiver_user_id=receiver_user_id,
+            callback_query_id=callback_query_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             business_connection_id=self.business_connection_id,
@@ -3453,6 +3483,7 @@ class Message(Object, Update):
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -3534,6 +3565,9 @@ class Message(Object, Update):
                 For group and supergroup chats only.
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
+
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -3630,6 +3664,7 @@ class Message(Object, Update):
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
             receiver_user_id=receiver_user_id,
+            callback_query_id=callback_query_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -3661,6 +3696,7 @@ class Message(Object, Update):
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -3736,6 +3772,9 @@ class Message(Object, Update):
                 For group and supergroup chats only.
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
+
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -3818,6 +3857,7 @@ class Message(Object, Update):
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
             receiver_user_id=receiver_user_id,
+            callback_query_id=callback_query_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -4438,6 +4478,7 @@ class Message(Object, Update):
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         allow_paid_broadcast: Optional[bool] = None,
@@ -4505,6 +4546,9 @@ class Message(Object, Update):
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
+
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
                 For private chats only.
@@ -4563,6 +4607,7 @@ class Message(Object, Update):
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
             receiver_user_id=receiver_user_id,
+            callback_query_id=callback_query_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             business_connection_id=self.business_connection_id,
@@ -4587,6 +4632,7 @@ class Message(Object, Update):
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         allow_paid_broadcast: Optional[bool] = None,
@@ -4648,6 +4694,9 @@ class Message(Object, Update):
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
+
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
                 For private chats only.
@@ -4692,6 +4741,7 @@ class Message(Object, Update):
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
             receiver_user_id=receiver_user_id,
+            callback_query_id=callback_query_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             business_connection_id=self.business_connection_id,
@@ -4892,6 +4942,7 @@ class Message(Object, Update):
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: Optional[int] = None,
         show_caption_above_media: Optional[bool] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
@@ -4955,6 +5006,9 @@ class Message(Object, Update):
                 For group and supergroup chats only.
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
+
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -5027,6 +5081,7 @@ class Message(Object, Update):
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
             receiver_user_id=receiver_user_id,
+            callback_query_id=callback_query_id,
             effect_id=effect_id,
             show_caption_above_media=show_caption_above_media,
             reply_parameters=reply_parameters,
@@ -5057,6 +5112,7 @@ class Message(Object, Update):
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: Optional[int] = None,
         show_caption_above_media: Optional[bool] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
@@ -5113,6 +5169,9 @@ class Message(Object, Update):
                 For group and supergroup chats only.
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
+
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -5171,6 +5230,7 @@ class Message(Object, Update):
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
             receiver_user_id=receiver_user_id,
+            callback_query_id=callback_query_id,
             effect_id=effect_id,
             show_caption_above_media=show_caption_above_media,
             reply_parameters=reply_parameters,
@@ -5197,6 +5257,7 @@ class Message(Object, Update):
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -5276,6 +5337,9 @@ class Message(Object, Update):
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
+
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
                 For private chats only.
@@ -5375,6 +5439,7 @@ class Message(Object, Update):
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
             receiver_user_id=receiver_user_id,
+            callback_query_id=callback_query_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -5407,6 +5472,7 @@ class Message(Object, Update):
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -5479,6 +5545,9 @@ class Message(Object, Update):
                 For group and supergroup chats only.
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
+
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -5565,6 +5634,7 @@ class Message(Object, Update):
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
             receiver_user_id=receiver_user_id,
+            callback_query_id=callback_query_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -6215,6 +6285,7 @@ class Message(Object, Update):
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -6284,6 +6355,9 @@ class Message(Object, Update):
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
+
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
                 For private chats only.
@@ -6374,6 +6448,7 @@ class Message(Object, Update):
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
             receiver_user_id=receiver_user_id,
+            callback_query_id=callback_query_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -6402,6 +6477,7 @@ class Message(Object, Update):
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -6464,6 +6540,9 @@ class Message(Object, Update):
                 For group and supergroup chats only.
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
+
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -6541,6 +6620,7 @@ class Message(Object, Update):
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
             receiver_user_id=receiver_user_id,
+            callback_query_id=callback_query_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -6566,6 +6646,7 @@ class Message(Object, Update):
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         allow_paid_broadcast: Optional[bool] = None,
@@ -6631,6 +6712,9 @@ class Message(Object, Update):
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
+
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
                 For private chats only.
@@ -6689,6 +6773,7 @@ class Message(Object, Update):
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
             receiver_user_id=receiver_user_id,
+            callback_query_id=callback_query_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             business_connection_id=self.business_connection_id,
@@ -6714,6 +6799,7 @@ class Message(Object, Update):
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         allow_paid_broadcast: Optional[bool] = None,
@@ -6772,6 +6858,9 @@ class Message(Object, Update):
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
+
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
                 For private chats only.
@@ -6816,6 +6905,7 @@ class Message(Object, Update):
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
             receiver_user_id=receiver_user_id,
+            callback_query_id=callback_query_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             business_connection_id=self.business_connection_id,
@@ -6845,6 +6935,7 @@ class Message(Object, Update):
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -6955,6 +7046,9 @@ class Message(Object, Update):
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
+
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
                 For private chats only.
@@ -7059,6 +7153,7 @@ class Message(Object, Update):
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
             receiver_user_id=receiver_user_id,
+            callback_query_id=callback_query_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -7098,6 +7193,7 @@ class Message(Object, Update):
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -7202,6 +7298,9 @@ class Message(Object, Update):
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
 
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
+
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
                 For private chats only.
@@ -7292,6 +7391,7 @@ class Message(Object, Update):
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
             receiver_user_id=receiver_user_id,
+            callback_query_id=callback_query_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -7316,6 +7416,7 @@ class Message(Object, Update):
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -7386,6 +7487,9 @@ class Message(Object, Update):
                 For group and supergroup chats only.
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
+
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -7483,6 +7587,7 @@ class Message(Object, Update):
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
             receiver_user_id=receiver_user_id,
+            callback_query_id=callback_query_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -7513,6 +7618,7 @@ class Message(Object, Update):
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -7576,6 +7682,9 @@ class Message(Object, Update):
                 For group and supergroup chats only.
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
+
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -7659,6 +7768,7 @@ class Message(Object, Update):
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
             receiver_user_id=receiver_user_id,
+            callback_query_id=callback_query_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -7685,6 +7795,7 @@ class Message(Object, Update):
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -7754,6 +7865,9 @@ class Message(Object, Update):
                 For group and supergroup chats only.
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
+
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -7849,6 +7963,7 @@ class Message(Object, Update):
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
             receiver_user_id=receiver_user_id,
+            callback_query_id=callback_query_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
@@ -7878,6 +7993,7 @@ class Message(Object, Update):
         message_thread_id: Optional[int] = None,
         direct_messages_topic_id: Optional[int] = None,
         receiver_user_id: Optional[Union[int, str]] = None,
+        callback_query_id: Optional[str] = None,
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         schedule_date: Optional[datetime] = None,
@@ -7941,6 +8057,9 @@ class Message(Object, Update):
                 For group and supergroup chats only.
                 It is not guaranteed that the user will receive the message, especially if they are offline.
                 See `ephemeral message sending <https://core.telegram.org/bots/api#ephemeral-messages-and-commands>`__ for more details.
+
+            callback_query_id (``str``, *optional*):
+                For outgoing ephemeral messages, identifier of the callback query which triggered the message if any.
 
             effect_id (``int``, *optional*):
                 Unique identifier of the message effect.
@@ -8022,6 +8141,7 @@ class Message(Object, Update):
             message_thread_id=message_thread_id,
             direct_messages_topic_id=direct_messages_topic_id,
             receiver_user_id=receiver_user_id,
+            callback_query_id=callback_query_id,
             effect_id=effect_id,
             reply_parameters=reply_parameters,
             schedule_date=schedule_date,
