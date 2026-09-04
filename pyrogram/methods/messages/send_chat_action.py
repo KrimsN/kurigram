@@ -71,10 +71,13 @@ class SendChatAction:
 
         action_name = action.name.lower()
 
+        # `action.value` is statically a union of every raw SendMessage*Action class; ty
+        #  can't correlate that with `action_name` above, which does pick out exactly the
+        #  six classes that declare a required `progress` argument.
         if "upload" in action_name or "history" in action_name:
-            action = action.value(progress=0)
+            action = action.value(progress=0)  # ty: ignore[unknown-argument]
         else:
-            action = action.value()
+            action = action.value()  # ty: ignore[missing-argument]
 
         return await self.invoke(
             raw.functions.messages.SetTyping(
