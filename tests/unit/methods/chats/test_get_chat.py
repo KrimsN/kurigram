@@ -17,13 +17,14 @@
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
+from typing import Final
 
 import pytest
 
 from pyrogram import raw
 from pyrogram.methods.chats.get_chat import GetChat
 
-_CHANNEL_ID = 42
+_CHANNEL_ID: Final = 42
 
 
 class Client(GetChat):
