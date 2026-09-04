@@ -541,7 +541,9 @@ def compute_password_check(
     # srp_B, current_algo and srp_id share the same has_password flag bit: every caller
     #  of compute_password_check() only reaches it once the account is known to already
     #  have a password set, so this is never actually None.
-    assert B_bytes is not None, "compute_password_check() requires a password already set on the account"
+    if B_bytes is None:
+        raise RuntimeError("compute_password_check() requires a password already set on the account")
+
     B = btoi(B_bytes)
 
     srp_id = r.srp_id

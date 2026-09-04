@@ -66,7 +66,9 @@ class TCPAbridgedO(TCP):
 
     async def send(self, data: bytes, *args) -> None:
         encrypt = self.encrypt
-        assert encrypt is not None, "send() requires connect() to have run first"
+
+        if encrypt is None:
+            raise RuntimeError("send() requires connect() to have run first")
 
         length = len(data) // 4
         data = (
@@ -80,7 +82,9 @@ class TCPAbridgedO(TCP):
 
     async def recv(self, length: int = 0) -> Optional[bytes]:
         decrypt = self.decrypt
-        assert decrypt is not None, "recv() requires connect() to have run first"
+
+        if decrypt is None:
+            raise RuntimeError("recv() requires connect() to have run first")
 
         length = await super().recv(1)
 

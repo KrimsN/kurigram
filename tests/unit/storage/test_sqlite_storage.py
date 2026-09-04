@@ -43,5 +43,5 @@ async def test_conn_property_round_trips_the_connection() -> None:
 def test_conn_raises_before_open() -> None:
     storage = SQLiteStorage("test", Path("."), in_memory=True)
 
-    with pytest.raises(AssertionError):
+    with pytest.raises(RuntimeError):
         _ = storage.conn

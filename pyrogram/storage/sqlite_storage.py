@@ -169,9 +169,11 @@ class SQLiteStorage(Storage):
     @property
     def conn(self) -> sqlite3.Connection:
         # Every method below this point runs only after open() has set a real
-        #  connection; asserting it here narrows the type once for all of them
+        #  connection; raising here narrows the type once for all of them
         #  instead of repeating the same guard at every call site.
-        assert self._conn is not None, "SQLiteStorage.conn accessed before open()"
+        if self._conn is None:
+            raise RuntimeError("SQLiteStorage.conn accessed before open()")
+
         return self._conn
 
     @conn.setter
