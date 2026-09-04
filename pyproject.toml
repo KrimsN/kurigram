@@ -159,7 +159,6 @@ exclude = [
 empty-body = "ignore"
 invalid-argument-type = "ignore"
 invalid-assignment = "ignore"
-invalid-await = "ignore"
 invalid-context-manager = "ignore"
 invalid-method-override = "ignore"
 invalid-parameter-default = "ignore"
