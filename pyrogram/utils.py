@@ -383,14 +383,19 @@ def get_peer_id(peer: Union[raw.base.Peer, raw.base.InputPeer, raw.base.Requeste
     if hasattr(peer, "user_id"):
         return peer.user_id
 
-    # `hasattr` doesn't narrow `peer` for ty the way `isinstance` would; every raw
-    #  constructor that carries `chat_id`/`channel_id` declares it as a plain `long`
-    #  (never optional), so the attribute is an `int` whenever it's actually present.
-    if hasattr(peer, "chat_id"):
-        return -peer.chat_id  # ty: ignore[unsupported-operator]
+    if isinstance(peer, (raw.types.PeerChat, raw.types.InputPeerChat, raw.types.RequestedPeerChat)):
+        return -peer.chat_id
 
-    if hasattr(peer, "channel_id"):
-        return ZERO_CHANNEL_ID - peer.channel_id  # ty: ignore[unsupported-operator]
+    if isinstance(
+        peer,
+        (
+            raw.types.PeerChannel,
+            raw.types.InputPeerChannel,
+            raw.types.InputPeerChannelFromMessage,
+            raw.types.RequestedPeerChannel,
+        ),
+    ):
+        return ZERO_CHANNEL_ID - peer.channel_id
 
     raise ValueError(f"Peer type invalid: {peer}")
 
