@@ -156,7 +156,6 @@ exclude = [
 # This ignore list is a ceiling, not a target: it is exactly the set of rules the tree
 #  fails today, so the check can only regress on rules not listed here, and the list is
 #  meant to shrink one rule at a time, the same pattern `[tool.ruff.lint].select` uses.
-empty-body = "ignore"
 invalid-argument-type = "ignore"
 invalid-assignment = "ignore"
 invalid-context-manager = "ignore"
