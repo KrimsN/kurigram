@@ -155,7 +155,7 @@ class SQLiteStorage(Storage):
         use_wal: Optional[bool] = False,
     ):
         self.name = name
-        self.conn = None  # type: sqlite3.Connection
+        self._conn: Optional[sqlite3.Connection] = None
 
         self.session_string = session_string
         self.in_memory = in_memory
@@ -165,6 +165,18 @@ class SQLiteStorage(Storage):
             self.database = ":memory:"
         else:
             self.database = workdir / (self.name + self.FILE_EXTENSION)
+
+    @property
+    def conn(self) -> sqlite3.Connection:
+        # Every method below this point runs only after open() has set a real
+        #  connection; asserting it here narrows the type once for all of them
+        #  instead of repeating the same guard at every call site.
+        assert self._conn is not None, "SQLiteStorage.conn accessed before open()"
+        return self._conn
+
+    @conn.setter
+    def conn(self, value: Optional[sqlite3.Connection]) -> None:
+        self._conn = value
 
     async def update(self):
         version = await self.version()
