@@ -880,8 +880,8 @@ class Client(Methods):
                                             max_id=update.message.id
                                         )]
                                     ),
-                                    pts=pts - pts_count,
-                                    limit=pts,
+                                    pts=update.pts - update.pts_count,
+                                    limit=update.pts,
                                     force=False
                                 )
                             )
@@ -1146,19 +1146,24 @@ class Client(Methods):
             file_type = file_id.file_type
 
             if file_type == FileType.CHAT_PHOTO:
-                if file_id.chat_id > 0:
+                # read_photo_tail() only sets chat_id for the CHAT_PHOTO thumbnail sources,
+                #  so a FileId of this file_type always carries one.
+                chat_id = file_id.chat_id
+                assert chat_id is not None, "a CHAT_PHOTO file_id always carries a chat_id"
+
+                if chat_id > 0:
                     peer = raw.types.InputPeerUser(
-                        user_id=file_id.chat_id,
+                        user_id=chat_id,
                         access_hash=file_id.chat_access_hash
                     )
                 else:
                     if file_id.chat_access_hash == 0:
                         peer = raw.types.InputPeerChat(
-                            chat_id=-file_id.chat_id
+                            chat_id=-chat_id
                         )
                     else:
                         peer = raw.types.InputPeerChannel(
-                            channel_id=utils.get_channel_id(file_id.chat_id),
+                            channel_id=utils.get_channel_id(chat_id),
                             access_hash=file_id.chat_access_hash
                         )
 

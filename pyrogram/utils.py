@@ -383,11 +383,14 @@ def get_peer_id(peer: Union[raw.base.Peer, raw.base.InputPeer, raw.base.Requeste
     if hasattr(peer, "user_id"):
         return peer.user_id
 
+    # `hasattr` doesn't narrow `peer` for ty the way `isinstance` would; every raw
+    #  constructor that carries `chat_id`/`channel_id` declares it as a plain `long`
+    #  (never optional), so the attribute is an `int` whenever it's actually present.
     if hasattr(peer, "chat_id"):
-        return -peer.chat_id
+        return -peer.chat_id  # ty: ignore[unsupported-operator]
 
     if hasattr(peer, "channel_id"):
-        return ZERO_CHANNEL_ID - peer.channel_id
+        return ZERO_CHANNEL_ID - peer.channel_id  # ty: ignore[unsupported-operator]
 
     raise ValueError(f"Peer type invalid: {peer}")
 
@@ -530,6 +533,10 @@ def compute_password_check(
     g = algo.g
 
     B_bytes = r.srp_B
+    # srp_B, current_algo and srp_id share the same has_password flag bit: every caller
+    #  of compute_password_check() only reaches it once the account is known to already
+    #  have a password set, so this is never actually None.
+    assert B_bytes is not None, "compute_password_check() requires a password already set on the account"
     B = btoi(B_bytes)
 
     srp_id = r.srp_id
