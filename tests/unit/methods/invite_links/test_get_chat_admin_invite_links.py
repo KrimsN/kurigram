@@ -27,7 +27,7 @@ _CHAT_ID = -1001234567890
 _ADMIN_ID = 7
 
 
-class Client(GetChatAdminInviteLinks):
+class FakeClient(GetChatAdminInviteLinks):
     """A client that answers `messages.GetExportedChatInvites` once, then an empty page."""
 
     def __init__(self, invites) -> None:
@@ -62,7 +62,7 @@ async def test_only_exported_invites_are_yielded() -> None:
     #  ChatInviteExported (e.g. ChatInvitePublicJoinRequests) — the method used to yield
     #  that None straight through an iterator typed and documented to yield only
     #  ChatInviteLink instances.
-    client = Client(
+    client = FakeClient(
         [
             raw.types.ChatInviteExported(
                 link="https://t.me/+aaaa", admin_id=_ADMIN_ID, date=1000
@@ -89,7 +89,7 @@ async def test_only_exported_invites_are_yielded() -> None:
 async def test_no_invites_yields_nothing() -> None:
     links = [
         link
-        async for link in Client([]).get_chat_admin_invite_links(_CHAT_ID, _ADMIN_ID)
+        async for link in FakeClient([]).get_chat_admin_invite_links(_CHAT_ID, _ADMIN_ID)
     ]
 
     assert links == []

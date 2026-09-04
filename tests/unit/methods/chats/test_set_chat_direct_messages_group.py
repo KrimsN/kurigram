@@ -24,7 +24,7 @@ from pyrogram.methods.chats.set_chat_direct_messages_group import (
 )
 
 
-class Client(SetChatDirectMessagesGroup):
+class FakeClient(SetChatDirectMessagesGroup):
     """A client that records the raw `broadcast_messages_allowed` it was sent."""
 
     def __init__(self) -> None:
@@ -43,7 +43,7 @@ async def test_default_is_enabled_leaves_the_flag_unset() -> None:
     # `is_enabled: bool = Optional[None]` evaluated at runtime to the NoneType class
     #  itself (Optional[None] collapses to NoneType), not to None — every call that
     #  omitted is_enabled silently forwarded that class object as the raw flag value.
-    client = Client()
+    client = FakeClient()
 
     await client.set_chat_direct_messages_group(1)
 
@@ -52,7 +52,7 @@ async def test_default_is_enabled_leaves_the_flag_unset() -> None:
 
 @pytest.mark.asyncio
 async def test_explicit_is_enabled_is_forwarded() -> None:
-    client = Client()
+    client = FakeClient()
 
     await client.set_chat_direct_messages_group(1, is_enabled=True)
 

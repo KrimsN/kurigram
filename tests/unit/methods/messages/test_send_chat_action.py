@@ -22,7 +22,7 @@ from pyrogram import enums, raw
 from pyrogram.methods.messages.send_chat_action import SendChatAction, _ACTIONS
 
 
-class Client(SendChatAction):
+class FakeClient(SendChatAction):
     """A client that captures the raw action built for `messages.SetTyping`."""
 
     def __init__(self) -> None:
@@ -42,7 +42,7 @@ async def test_every_chat_action_resolves_to_its_raw_action(action) -> None:
     # `_ACTIONS` is a hand-written map from every `enums.ChatAction` member to its raw
     #  constructor; this walks the enum itself so a member added without a matching
     #  entry fails here instead of surfacing as a KeyError at call time.
-    client = Client()
+    client = FakeClient()
 
     result = await client.send_chat_action(chat_id=7, action=action)
 

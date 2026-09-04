@@ -24,7 +24,7 @@ from pyrogram import raw, types
 from pyrogram.methods.premium.get_boosts import GetBoosts
 
 
-class Client(GetBoosts):
+class FakeClient(GetBoosts):
     """A client that answers `premium.GetMyBoosts` with the boosts it was given."""
 
     def __init__(self, my_boosts: List[raw.types.MyBoost]) -> None:
@@ -53,7 +53,7 @@ async def test_every_boost_is_parsed() -> None:
     # `types.List` handed a generator expression that yields awaits used to be an async
     #  generator (PEP 530): `list()` refused it with `TypeError: 'async_generator' object
     #  is not iterable`, so `get_boosts()` never returned.
-    client = Client(
+    client = FakeClient(
         [
             raw.types.MyBoost(
                 slot=1,
@@ -79,6 +79,6 @@ async def test_every_boost_is_parsed() -> None:
 
 @pytest.mark.asyncio
 async def test_no_boosts_answers_with_an_empty_list() -> None:
-    boosts = await Client([]).get_boosts()
+    boosts = await FakeClient([]).get_boosts()
 
     assert boosts == []

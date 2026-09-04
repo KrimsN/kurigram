@@ -27,7 +27,7 @@ class _Parser:
         return {"message": text, "entities": []}
 
 
-class Client(PlaceGiftAuctionBid):
+class FakeClient(PlaceGiftAuctionBid):
     """A client that records the raw `message` sent as part of the auction bid invoice."""
 
     def __init__(self) -> None:
@@ -64,7 +64,7 @@ async def test_bid_text_is_written_with_the_client() -> None:
     # FormattedText.write() requires `client`; calling it with no arguments raised
     #  `TypeError: write() missing 1 required positional argument` whenever bid text
     #  was actually provided.
-    client = Client()
+    client = FakeClient()
 
     result = await client.place_gift_auction_bid(gift_id=1, star_count=100, text="hello")
 
@@ -75,7 +75,7 @@ async def test_bid_text_is_written_with_the_client() -> None:
 
 @pytest.mark.asyncio
 async def test_no_text_skips_write() -> None:
-    client = Client()
+    client = FakeClient()
 
     await client.place_gift_auction_bid(gift_id=1, star_count=100)
 

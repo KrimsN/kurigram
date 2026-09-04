@@ -22,7 +22,7 @@ from pyrogram import enums, raw
 from pyrogram.methods.chats.get_top_chats import GetTopChats
 
 
-class Client(GetTopChats):
+class FakeClient(GetTopChats):
     """A client that answers `contacts.GetTopPeers` once, then an empty page."""
 
     def __init__(self) -> None:
@@ -70,7 +70,7 @@ async def test_group_and_user_peers_are_both_resolved() -> None:
     # `chats` used to be assigned the `r.chats` lookup dict and then immediately
     #  reassigned to the result list, so `chats.get(peer_id)` crashed with
     #  AttributeError for any peer that wasn't a user (list has no `.get`).
-    chats = [chat async for chat in Client().get_top_chats(enums.TopChatCategory.GROUPS)]
+    chats = [chat async for chat in FakeClient().get_top_chats(enums.TopChatCategory.GROUPS)]
 
     # Public chat ids negate the raw group id; the raw lookup itself stays keyed by 42.
     assert [chat.id for chat in chats] == [7, -42]
@@ -78,7 +78,7 @@ async def test_group_and_user_peers_are_both_resolved() -> None:
 
 @pytest.mark.asyncio
 async def test_no_peers_yields_nothing() -> None:
-    client = Client()
+    client = FakeClient()
     client.invocations = 1  # skip straight to the empty page
 
     chats = [chat async for chat in client.get_top_chats(enums.TopChatCategory.GROUPS)]

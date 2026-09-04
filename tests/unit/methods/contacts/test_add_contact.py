@@ -27,7 +27,7 @@ class _Parser:
         return {"message": text, "entities": []}
 
 
-class Client(AddContact):
+class FakeClient(AddContact):
     """A client that records the raw `note` sent to `contacts.AddContact`."""
 
     def __init__(self) -> None:
@@ -55,7 +55,7 @@ async def test_note_is_written_with_the_client() -> None:
     # FormattedText.write() requires `client` to resolve mentions/parse_mode; calling it
     #  with no arguments raised `TypeError: write() missing 1 required positional argument`
     #  whenever a note was actually provided.
-    client = Client()
+    client = FakeClient()
 
     user = await client.add_contact(7, "Foo", note="hello")
 
@@ -66,7 +66,7 @@ async def test_note_is_written_with_the_client() -> None:
 
 @pytest.mark.asyncio
 async def test_no_note_skips_write() -> None:
-    client = Client()
+    client = FakeClient()
 
     await client.add_contact(7, "Foo")
 

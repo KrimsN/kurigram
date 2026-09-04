@@ -27,7 +27,7 @@ from pyrogram.methods.chats.get_chat import GetChat
 _CHANNEL_ID: Final = 42
 
 
-class Client(GetChat):
+class FakeClient(GetChat):
     """A client whose channels.GetChannels answers with a sliced result."""
 
     INVITE_LINK_RE = re.compile(
@@ -62,7 +62,7 @@ async def test_a_sliced_channel_result_is_resolved() -> None:
     #  subscripting the raw response itself, which crashed with TypeError for
     #  ChatsSlice (it isn't a list; the chats live under its `.chats` attribute,
     #  same as on messages.Chats).
-    chat = await Client().get_chat(-_CHANNEL_ID, force_full=False)
+    chat = await FakeClient().get_chat(-_CHANNEL_ID, force_full=False)
 
     assert chat.id == -1000000000000 - _CHANNEL_ID
     assert chat.title == "Channel 42"

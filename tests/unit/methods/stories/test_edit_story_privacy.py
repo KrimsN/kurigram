@@ -29,7 +29,7 @@ class _InvokeCalled(Exception):
         self.query = query
 
 
-class Client(EditStoryPrivacy):
+class FakeClient(EditStoryPrivacy):
     async def resolve_peer(self, peer_id):
         return raw.types.InputPeerUser(user_id=peer_id, access_hash=0)
 
@@ -42,7 +42,7 @@ async def test_selected_users_without_allowed_users_does_not_crash() -> None:
     # `for user in allowed_users` iterated `allowed_users` unconditionally, so
     #  SELECTED_USERS with no `allowed_users` raised
     #  `TypeError: 'NoneType' object is not iterable` instead of sending an empty rule set.
-    client = Client()
+    client = FakeClient()
 
     with pytest.raises(_InvokeCalled) as exc_info:
         await client.edit_story_privacy(
@@ -54,7 +54,7 @@ async def test_selected_users_without_allowed_users_does_not_crash() -> None:
 
 @pytest.mark.asyncio
 async def test_selected_users_with_allowed_users() -> None:
-    client = Client()
+    client = FakeClient()
 
     with pytest.raises(_InvokeCalled) as exc_info:
         await client.edit_story_privacy(

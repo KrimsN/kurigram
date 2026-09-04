@@ -24,7 +24,7 @@ from pyrogram.methods.contacts.get_blocked_message_senders import (
 )
 
 
-class Client(GetBlockedMessageSenders):
+class FakeClient(GetBlockedMessageSenders):
     """A client that answers `contacts.GetBlocked` once, then an empty page."""
 
     def __init__(self, blocked, users) -> None:
@@ -48,7 +48,7 @@ async def test_a_peer_missing_from_users_and_chats_is_skipped() -> None:
     # Chat._parse_chat() resolves to None when the peer isn't in either lookup map —
     #  the method used to yield that None straight through an iterator typed and
     #  documented to yield only Chat instances.
-    client = Client(
+    client = FakeClient(
         blocked=[
             raw.types.PeerBlocked(peer_id=raw.types.PeerUser(user_id=7), date=1000),
             raw.types.PeerBlocked(peer_id=raw.types.PeerUser(user_id=999), date=2000),
@@ -65,6 +65,6 @@ async def test_a_peer_missing_from_users_and_chats_is_skipped() -> None:
 
 @pytest.mark.asyncio
 async def test_no_blocked_senders_yields_nothing() -> None:
-    chats = [chat async for chat in Client(blocked=[], users=[]).get_blocked_message_senders()]
+    chats = [chat async for chat in FakeClient(blocked=[], users=[]).get_blocked_message_senders()]
 
     assert chats == []
