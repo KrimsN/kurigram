@@ -1151,7 +1151,8 @@ class Client(Methods):
                 chat_id = file_id.chat_id
 
                 if chat_id is None:
-                    raise RuntimeError("a CHAT_PHOTO file_id always carries a chat_id")
+                    msg = "Unexpected error. `CHAT_PHOTO` must always carry a `chat_id`"
+                    raise RuntimeError(msg)
 
                 if chat_id > 0:
                     peer = raw.types.InputPeerUser(
