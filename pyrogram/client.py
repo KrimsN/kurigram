@@ -456,7 +456,10 @@ class Client(Methods):
 
     def __exit__(self, *args):
         try:
-            self.stop()
+            # `Client.stop` is only a plain coroutine function here when `pyrogram.sync`
+            #  hasn't patched it into a blocking sync wrapper (see pyrogram/sync.py);
+            #  `ty` can't see that runtime substitution.
+            self.stop()  # ty: ignore[unused-awaitable]
         except ConnectionError:
             pass
 
