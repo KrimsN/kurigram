@@ -42,4 +42,5 @@ async def test_users_are_resolved_from_the_lookup_dict() -> None:
 
     parsed = await types.BusinessRecipients._parse(None, recipients, users=users)
 
+    assert parsed.users is not None
     assert [user.id for user in parsed.users] == [7]
