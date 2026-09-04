@@ -68,7 +68,7 @@ class TCPAbridgedO(TCP):
         encrypt = self.encrypt
 
         if encrypt is None:
-            msg = "send() requires connect() to have run first"
+            msg = "`send()` requires `connect()` to have run first"
             raise RuntimeError(msg)
 
         length = len(data) // 4
