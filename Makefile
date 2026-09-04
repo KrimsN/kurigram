@@ -85,8 +85,11 @@ lint:
 
 # The rule set and the excludes live in `pyproject.toml`, same as `lint`. Unlike `lint`,
 #  this needs `pyrogram.raw.*` to resolve, so `make api` has to have been run first.
+# `ty` only auto-detects a project's virtual environment when it's named `.venv`; ours
+#  is plain `venv` (see $(VENV) above), so point it there explicitly or it silently
+#  falls back to the system interpreter and can't resolve any installed dependency.
 typecheck:
-	$(TY) check
+	$(TY) check --python $(VENV)
 
 # `make venv` installs the package alone, so the runner needs `make venv-dev` first.
 test:
