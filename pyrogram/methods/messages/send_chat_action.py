@@ -16,7 +16,7 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
-from typing import Callable, Dict, Optional, Union
+from typing import Callable, Dict, Final, Optional, Union
 
 import pyrogram
 from pyrogram import raw, enums
@@ -25,7 +25,7 @@ from pyrogram import raw, enums
 #  building the raw action never has to inspect the enum member's name at
 #  runtime, and each lambda is checked against its own concrete raw type
 #  instead of the `raw.base.SendMessageAction` union `action.value` carries.
-_ACTIONS: Dict["enums.ChatAction", Callable[[], "raw.base.SendMessageAction"]] = {
+_ACTIONS: Final[Dict["enums.ChatAction", Callable[[], "raw.base.SendMessageAction"]]] = {
     enums.ChatAction.TYPING: raw.types.SendMessageTypingAction,
     enums.ChatAction.UPLOAD_PHOTO: lambda: raw.types.SendMessageUploadPhotoAction(progress=0),
     enums.ChatAction.RECORD_VIDEO: raw.types.SendMessageRecordVideoAction,
