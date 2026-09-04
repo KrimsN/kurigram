@@ -74,7 +74,7 @@ class TCPIntermediateO(TCP):
         encrypt = self.encrypt
 
         if encrypt is None:
-            msg = "send() requires connect() to have run first"
+            msg = "`send()` requires `connect()` to have run first"
             raise RuntimeError(msg)
 
         await super().send(aes.ctr256_encrypt(pack("<i", len(data)) + data, *encrypt))
@@ -83,7 +83,7 @@ class TCPIntermediateO(TCP):
         decrypt = self.decrypt
 
         if decrypt is None:
-            msg = "recv() requires connect() to have run first"
+            msg = "`recv()` requires `connect()` to have run first"
             raise RuntimeError(msg)
 
         length = await super().recv(4)

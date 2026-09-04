@@ -1146,8 +1146,8 @@ class Client(Methods):
             file_type = file_id.file_type
 
             if file_type == FileType.CHAT_PHOTO:
-                # read_photo_tail() only sets chat_id for the CHAT_PHOTO thumbnail sources,
-                #  so a FileId of this file_type always carries one.
+                # `read_photo_tail()` only sets `chat_id` for the `CHAT_PHOTO` thumbnail sources,
+                #  so a `FileId` of this `file_type` always carries one.
                 chat_id = file_id.chat_id
 
                 if chat_id is None:

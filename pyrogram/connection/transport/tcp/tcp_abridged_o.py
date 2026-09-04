@@ -85,7 +85,7 @@ class TCPAbridgedO(TCP):
         decrypt = self.decrypt
 
         if decrypt is None:
-            msg = "recv() requires connect() to have run first"
+            msg = "`recv()` requires `connect()` to have run first"
             raise RuntimeError(msg)
 
         length = await super().recv(1)

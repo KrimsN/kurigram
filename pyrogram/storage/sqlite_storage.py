@@ -172,7 +172,7 @@ class SQLiteStorage(Storage):
         #  connection; raising here narrows the type once for all of them
         #  instead of repeating the same guard at every call site.
         if self._conn is None:
-            msg = "SQLiteStorage.conn accessed before open()"
+            msg = "`SQLiteStorage.conn` accessed before `open()`"
             raise RuntimeError(msg)
 
         return self._conn
