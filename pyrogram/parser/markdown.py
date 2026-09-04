@@ -103,8 +103,8 @@ class Markdown:
         # Handle Expandable Quote
         inside_blockquote = False
         for index, line in enumerate(text_lines):
-            # create_blockquote() only nils out indexes strictly before the current one
-            # (already-merged lines), so `line` here is never one of its None placeholders.
+            # `create_blockquote()` only nils out indexes strictly before the current one
+            # (already-merged lines), so `line` here is never one of its `None` placeholders.
             if line is None:
                 continue
 
