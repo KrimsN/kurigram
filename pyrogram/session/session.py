@@ -564,7 +564,7 @@ class Session:
             except (FloodWait, FloodPremiumWait) as e:
                 amount = e.seconds
 
-                if amount > sleep_threshold >= 0:
+                if amount is None or amount > sleep_threshold >= 0:
                     raise
 
                 log.warning(
