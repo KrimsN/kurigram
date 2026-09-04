@@ -80,7 +80,7 @@ class GetTopChats:
                 return
 
             users = {i.id: i for i in r.users}
-            chats = {i.id: i for i in r.chats}
+            chats_map = {i.id: i for i in r.chats}
 
             chats = []
 
@@ -88,7 +88,10 @@ class GetTopChats:
                 for top_peer in cat.peers:
                     peer_id = utils.get_raw_peer_id(top_peer.peer)
 
-                    chats.append(await types.Chat._parse_chat(self, users.get(peer_id) or chats.get(peer_id)))
+                    chat = await types.Chat._parse_chat(self, users.get(peer_id) or chats_map.get(peer_id))
+
+                    if chat is not None:
+                        chats.append(chat)
 
             if not chats:
                 return
