@@ -20,7 +20,7 @@ import contextlib
 import logging
 from datetime import datetime
 from functools import partial
-from typing import BinaryIO, Callable, Dict, List, Match, Optional, Union
+from typing import BinaryIO, Callable, Dict, List, Match, Optional, Type, Union
 
 import pyrogram
 from pyrogram import enums, raw, types, utils
@@ -8907,12 +8907,17 @@ class Message(Object, Update):
         business_connection_id: Optional[str] = None,
         allow_paid_broadcast: Optional[bool] = None,
         paid_message_star_count: Optional[int] = None,
-        reply_markup: Optional[Union[
+        # `object` (the class, not an instance) is the sentinel for "not specified" —
+        #  distinct from None, which means "remove the reply markup" — so the parameter
+        #  type has to include it alongside the real markup types.
+        reply_markup: Union[
             "types.InlineKeyboardMarkup",
             "types.ReplyKeyboardMarkup",
             "types.ReplyKeyboardRemove",
-            "types.ForceReply"
-        ]] = object,
+            "types.ForceReply",
+            None,
+            Type[object],
+        ] = object,
 
         reply_to_chat_id: Optional[Union[int, str]] = None,
         reply_to_message_id: Optional[int] = None,

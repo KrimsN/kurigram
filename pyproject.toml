@@ -159,7 +159,6 @@ exclude = [
 invalid-argument-type = "ignore"
 invalid-assignment = "ignore"
 invalid-method-override = "ignore"
-invalid-parameter-default = "ignore"
 invalid-return-type = "ignore"
 no-matching-overload = "ignore"
 not-iterable = "ignore"
