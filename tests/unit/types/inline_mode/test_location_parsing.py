@@ -28,7 +28,7 @@ _USERS = {
 @pytest.mark.asyncio
 async def test_chosen_inline_result_with_geo_does_not_crash() -> None:
     # types.Location doesn't accept a `client` argument at all (it isn't an Update
-    #  subclass) — passing one raised `TypeError: __init__() got an unexpected keyword
+    #  subclass), so passing one raised `TypeError: __init__() got an unexpected keyword
     #  argument 'client'` for every chosen inline result that carried a location.
     update = raw.types.UpdateBotInlineSend(
         user_id=7,

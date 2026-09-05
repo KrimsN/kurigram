@@ -41,7 +41,7 @@ class FakeClient(SetChatDirectMessagesGroup):
 @pytest.mark.asyncio
 async def test_default_is_enabled_leaves_the_flag_unset() -> None:
     # `is_enabled: bool = Optional[None]` evaluated at runtime to the NoneType class
-    #  itself (Optional[None] collapses to NoneType), not to None — every call that
+    #  itself (Optional[None] collapses to NoneType), not to None: every call that
     #  omitted is_enabled silently forwarded that class object as the raw flag value.
     client = FakeClient()
 

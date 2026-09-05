@@ -46,7 +46,7 @@ class _Message:
 @pytest.mark.asyncio
 async def test_reply_game_default_effect_id_is_none() -> None:
     # `effect_id: int = Optional[None]` evaluated at runtime to the NoneType class
-    #  itself, not to None (Optional[None] collapses to NoneType) — every call that
+    #  itself, not to None (Optional[None] collapses to NoneType): every call that
     #  omitted effect_id silently forwarded that class object to send_game().
     client = _Client()
 

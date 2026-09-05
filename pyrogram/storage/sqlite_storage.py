@@ -462,8 +462,8 @@ class SQLiteStorage(Storage):
             else await self._set(table, attr, value)
         )
 
-    # `object` (the class, not an instance) is the sentinel for "no value passed" —
-    #  read the column instead of writing to it — so every accessor's parameter type
+    # `object` (the class, not an instance) is the sentinel for "no value passed"
+    #  (read the column instead of writing to it), so every accessor's parameter type
     #  has to include it alongside the column's real type.
     async def dc_id(self, value: Union[int, Type[object]] = object):
         return await self._accessor("sessions", "dc_id", value)

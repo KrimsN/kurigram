@@ -9009,8 +9009,8 @@ class Message(Object, Update):
         business_connection_id: Optional[str] = None,
         allow_paid_broadcast: Optional[bool] = None,
         paid_message_star_count: Optional[int] = None,
-        # `object` (the class, not an instance) is the sentinel for "not specified" —
-        #  distinct from None, which means "remove the reply markup" — so the parameter
+        # `object` (the class, not an instance) is the sentinel for "not specified",
+        #  distinct from None, which means "remove the reply markup": so the parameter
         #  type has to include it alongside the real markup types.
         reply_markup: Union[
             "types.InlineKeyboardMarkup",

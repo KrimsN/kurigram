@@ -59,7 +59,7 @@ class FakeClient(GetChatAdminInviteLinks):
 @pytest.mark.asyncio
 async def test_only_exported_invites_are_yielded() -> None:
     # ChatInviteLink._parse() returns None for any ExportedChatInvite variant other than
-    #  ChatInviteExported (e.g. ChatInvitePublicJoinRequests) — the method used to yield
+    #  ChatInviteExported (e.g. ChatInvitePublicJoinRequests): the method used to yield
     #  that None straight through an iterator typed and documented to yield only
     #  ChatInviteLink instances.
     client = FakeClient(

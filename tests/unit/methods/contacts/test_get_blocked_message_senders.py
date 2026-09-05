@@ -45,7 +45,7 @@ class FakeClient(GetBlockedMessageSenders):
 
 @pytest.mark.asyncio
 async def test_a_peer_missing_from_users_and_chats_is_skipped() -> None:
-    # Chat._parse_chat() resolves to None when the peer isn't in either lookup map —
+    # Chat._parse_chat() resolves to None when the peer isn't in either lookup map:
     #  the method used to yield that None straight through an iterator typed and
     #  documented to yield only Chat instances.
     client = FakeClient(

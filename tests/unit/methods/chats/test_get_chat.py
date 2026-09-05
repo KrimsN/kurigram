@@ -58,7 +58,7 @@ class FakeClient(GetChat):
 @pytest.mark.asyncio
 async def test_a_sliced_channel_result_is_resolved() -> None:
     # GetChannels/GetChats can answer with either messages.Chats or
-    #  messages.ChatsSlice — the code only special-cased the former and fell back to
+    #  messages.ChatsSlice: the code only special-cased the former and fell back to
     #  subscripting the raw response itself, which crashed with TypeError for
     #  ChatsSlice (it isn't a list; the chats live under its `.chats` attribute,
     #  same as on messages.Chats).
