@@ -141,9 +141,9 @@ select = [
 
 [tool.ty.src]
 # `pyrogram/raw/{base,functions,types,all.py}` and `pyrogram/errors/exceptions` are
-# written by `make api`; `pyrogram/raw/core` is hand-written and stays in scope. A CLI
-# `--exclude` changes tree traversal and gives a different diagnostic count, so the
-# exclude has to live here to be reproducible.
+#  written by `make api`; `pyrogram/raw/core` is hand-written and stays in scope. A CLI
+#  `--exclude` changes tree traversal and gives a different diagnostic count, so the
+#  exclude has to live here to be reproducible.
 exclude = [
     "pyrogram/raw/base",
     "pyrogram/raw/functions",
