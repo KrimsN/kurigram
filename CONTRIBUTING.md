@@ -116,6 +116,13 @@ A few conventions that have come up repeatedly in code review but aren't enforce
 - Write commit messages using [Conventional Commits](https://www.conventionalcommits.org/)
   (`feat: ...`, `fix(scope): ...`, `chore(scope): ...`, `docs: ...`, etc.), matching the existing
   git history.
+- **The pull request title matters, not just commit messages.** The project squash-merges, so
+  the PR title becomes the actual commit message on `dev`. Title it the same way you would a
+  commit: `type(scope): description`, describing what the change actually does rather than a
+  generic label (`typing: introduce ty ...` was renamed to
+  `chore(typing): introduce ty static type checking, fix diagnostics incrementally` in review for
+  exactly this reason). If the branch gains more commits or changes scope before merge, update
+  the title to match; don't leave it describing an earlier, narrower version of the change.
 - Keep pull requests focused on one logical change. Unrelated fixes should be separate PRs.
 - Reference any related issue in the pull request description.
 
