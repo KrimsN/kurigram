@@ -71,18 +71,14 @@ class TCPIntermediateO(TCP):
         self.marker_event.set()
 
     async def send(self, data: bytes, *args) -> None:
-        encrypt = self.encrypt
-
-        if encrypt is None:
+        if self.encrypt is None:
             msg = "`send()` requires `connect()` to have run first"
             raise RuntimeError(msg)
 
-        await super().send(aes.ctr256_encrypt(pack("<i", len(data)) + data, *encrypt))
+        await super().send(aes.ctr256_encrypt(pack("<i", len(data)) + data, *self.encrypt))
 
     async def recv(self, length: int = 0) -> Optional[bytes]:
-        decrypt = self.decrypt
-
-        if decrypt is None:
+        if self.decrypt is None:
             msg = "`recv()` requires `connect()` to have run first"
             raise RuntimeError(msg)
 
@@ -91,11 +87,11 @@ class TCPIntermediateO(TCP):
         if length is None:
             return None
 
-        length = aes.ctr256_decrypt(length, *decrypt)
+        length = aes.ctr256_decrypt(length, *self.decrypt)
 
         data = await super().recv(unpack("<i", length)[0])
 
         if data is None:
             return None
 
-        return aes.ctr256_decrypt(data, *decrypt)
+        return aes.ctr256_decrypt(data, *self.decrypt)
