@@ -42,7 +42,7 @@ the generated types.
 Run these before opening a pull request:
 
 ```bash
-make lint         # ruff check
+make lint          # ruff check
 make typecheck     # ty check (requires `make api` to have been run first)
 make test-unit     # fast unit suite, no live credentials needed
 ```
