@@ -202,6 +202,7 @@ quote-style = "double"
 #  --statistics` reports over 22000 findings, the bulk of them line length, missing
 #  trailing commas and docstring section formatting.
 select = [
+    "ASYNC",  # flake8-async — blocking calls (files, sockets...) inside an async function.
     "E9",     # Syntax errors and files that cannot be read.
     "F632",   # `is` used against a literal.
     "F821",   # Undefined name.
@@ -212,6 +213,15 @@ select = [
     "UP035",  # An import of a `typing` alias the builtins replaced.
     "UP037",  # Quotes around an annotation that does not need deferring.
     "UP045",  # `Optional[int]` where `int | None` is meant.
+]
+
+ignore = [
+    # Every hit is a one-shot `os.path`/`pathlib.Path` stat (`isfile`, `getsize`, `mkdir`,
+    #  `unlink`, `abspath`) on a caller-supplied path, not inside a hot loop — the cost of
+    #  a blocking call there is a syscall, not the disk I/O the rule is written to catch.
+    #  Satisfying it for real means adopting `anyio.Path`/`trio.Path`, a new dependency this
+    #  asyncio-only client has no other use for, and a bigger undertaking than a lint fix.
+    "ASYNC240",
 ]
 
 [tool.ty.src]

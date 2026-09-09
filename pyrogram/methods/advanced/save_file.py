@@ -160,7 +160,7 @@ class SaveFile:
             part_size = 512 * 1024
 
             if isinstance(path, (str, PurePath)):
-                fp = open(path, "rb")
+                fp = await asyncio.to_thread(open, path, "rb")
             elif isinstance(path, io.IOBase):
                 fp = path
             else:

@@ -1253,7 +1253,7 @@ class Client(Methods):
         temp_file_path = (
             os.path.abspath(re.sub("\\\\", "/", os.path.join(directory, file_name))) + ".temp"
         )
-        file = BytesIO() if in_memory else open(temp_file_path, "wb")
+        file = BytesIO() if in_memory else await asyncio.to_thread(open, temp_file_path, "wb")
 
         try:
             async for chunk in self.get_file(file_id, file_size, 0, 0, progress, progress_args):
