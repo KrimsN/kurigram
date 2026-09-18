@@ -207,11 +207,22 @@ select = [
     "F821",   # Undefined name.
     "F822",   # Undefined name in `__all__`.
     "RUF013", # Implicit `Optional`, e.g. `def method(chat_id: int = None)`.
+    "TC",     # flake8-type-checking — imports only needed for annotations.
     "UP006",  # `List[str]` where `list[str]` is meant.
     "UP007",  # `Union[int, str]` where `int | str` is meant.
     "UP035",  # An import of a `typing` alias the builtins replaced.
     "UP037",  # Quotes around an annotation that does not need deferring.
     "UP045",  # `Optional[int]` where `int | None` is meant.
+]
+
+# `TC` is newly selected above but not yet clean: 424 pre-existing findings across the tree
+#  (see `.plans/ruff/tc-baseline-2026-09-19.md`). This boundary lets new code get caught by
+#  `TC` immediately without failing on the backlog; each code is dropped from here as the
+#  matching cleanup lands, same pattern as `[tool.ty.rules]` below.
+ignore = [
+    "TC001", # typing-only-first-party-import (140 findings).
+    "TC003", # typing-only-standard-library-import (280 findings).
+    "TC006", # runtime-cast-value (4 findings).
 ]
 
 [tool.ty.src]
