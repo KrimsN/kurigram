@@ -24,8 +24,6 @@ from typing import TYPE_CHECKING
 from pyrogram.connection.transport.tcp.tcp import ABRIDGED_OBFUSCATE_TAG, TCP
 
 if TYPE_CHECKING:
-    import asyncio
-
     from pyrogram.connection.proxy import Proxy
 
 log = logging.getLogger(__name__)

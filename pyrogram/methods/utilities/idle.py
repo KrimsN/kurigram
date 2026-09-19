@@ -19,10 +19,7 @@
 import asyncio
 import logging
 import signal
-from signal import SIGABRT, SIGINT, SIGTERM
-from signal import signal as signal_fn
-
-from pyrogram.utils import get_event_loop
+from signal import signal as signal_fn, SIGINT, SIGTERM, SIGABRT
 
 log = logging.getLogger(__name__)
 

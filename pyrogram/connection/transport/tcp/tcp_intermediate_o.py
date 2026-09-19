@@ -27,8 +27,6 @@ from pyrogram.connection.transport.tcp.tcp import TCP
 from pyrogram.crypto import aes
 
 if TYPE_CHECKING:
-    import asyncio
-
     from pyrogram.connection.proxy import Proxy
 
 log = logging.getLogger(__name__)

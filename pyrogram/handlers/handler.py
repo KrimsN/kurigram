@@ -23,9 +23,12 @@ import inspect
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
-import pyrogram
-from pyrogram.filters import Filter
-from pyrogram.types import Update
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    import pyrogram
+    from pyrogram.filters import Filter
+    from pyrogram.types import Update
 
 if TYPE_CHECKING:
     from pyrogram.raw.base import Update as RawUpdate
