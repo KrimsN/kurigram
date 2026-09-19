@@ -18,10 +18,9 @@
 
 from __future__ import annotations as _annotations
 
-import asyncio
 import logging
+from typing import TYPE_CHECKING
 
-from pyrogram.connection.proxy import Proxy
 from pyrogram.connection.transport.tcp.tcp import (
     ABRIDGED_OBFUSCATE_TAG,
     TCP,
@@ -29,6 +28,11 @@ from pyrogram.connection.transport.tcp.tcp import (
     generate_obfuscated2_nonce,
 )
 from pyrogram.crypto import aes
+
+if TYPE_CHECKING:
+    import asyncio
+
+    from pyrogram.connection.proxy import Proxy
 
 log = logging.getLogger(__name__)
 
