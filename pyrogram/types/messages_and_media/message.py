@@ -20,11 +20,8 @@ from __future__ import annotations as _annotations
 
 import contextlib
 import logging
-from datetime import datetime
 from functools import partial
-from typing import BinaryIO
-from re import Match
-from collections.abc import Callable
+from typing import TYPE_CHECKING, BinaryIO
 
 import pyrogram
 from pyrogram import enums, raw, types, utils
@@ -41,6 +38,11 @@ from pyrogram.parser import utils as parser_utils
 
 from ..object import Object
 from ..update import Update
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from datetime import datetime
+    from re import Match
 
 log = logging.getLogger(__name__)
 
