@@ -19,15 +19,15 @@
 from __future__ import annotations as _annotations
 
 from typing import TYPE_CHECKING, Any
-from collections.abc import Callable
-
-from pyrogram.filters import Filter
 
 from .handler import Handler
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     import pyrogram
     from pyrogram import types
+    from pyrogram.filters import Filter
 
 
 class DeletedMessagesHandler(Handler):

@@ -36,12 +36,10 @@ from importlib import import_module
 from io import BytesIO
 from mimetypes import MimeTypes
 from pathlib import Path
-from typing import Any
-from collections.abc import AsyncGenerator, Callable, Sequence
+from typing import TYPE_CHECKING, Any
 
 import pyrogram
 from pyrogram import __license__, __version__, enums, raw, utils
-from pyrogram.connection import Proxy
 from pyrogram.connection.proxy import ProxyDict, normalize_proxy
 from pyrogram.crypto import aes
 from pyrogram.errors import (
@@ -70,6 +68,11 @@ from .dispatcher import Dispatcher
 from .file_id import FileId, FileType, ThumbnailSource
 from .parser import Parser
 from .session.internals import MsgId
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncGenerator, Callable, Sequence
+
+    from pyrogram.connection import Proxy
 
 log = logging.getLogger(__name__)
 
