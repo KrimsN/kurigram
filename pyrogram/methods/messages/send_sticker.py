@@ -21,14 +21,16 @@ from __future__ import annotations as _annotations
 import logging
 import os
 import re
-from datetime import datetime
-from typing import BinaryIO
-from collections.abc import Callable
+from typing import TYPE_CHECKING, BinaryIO
 
 import pyrogram
 from pyrogram import StopTransmission, enums, raw, types, utils
 from pyrogram.errors import FilePartMissing
 from pyrogram.file_id import FileType
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from datetime import datetime
 
 log = logging.getLogger(__name__)
 
