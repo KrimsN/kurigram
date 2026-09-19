@@ -21,14 +21,16 @@ from __future__ import annotations as _annotations
 import io
 import pathlib
 import re
-from typing import BinaryIO
-from collections.abc import Callable
+from typing import TYPE_CHECKING, BinaryIO
 
 import pyrogram
 from pyrogram import raw, utils
 from pyrogram.file_id import FileType
 
 from .input_media import InputMedia
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class InputMediaSticker(InputMedia):
