@@ -23,12 +23,13 @@ from typing import TYPE_CHECKING, BinaryIO
 
 import pyrogram
 from pyrogram import StopTransmission, enums, raw, types, utils
-from pyrogram._typing import PathType
 from pyrogram.errors import FilePartMissing
 
 if TYPE_CHECKING:
     from collections.abc import Callable
     from datetime import datetime
+
+    from pyrogram._typing import PathType
 
 log = logging.getLogger(__name__)
 
