@@ -215,16 +215,6 @@ select = [
     "UP045",  # `Optional[int]` where `int | None` is meant.
 ]
 
-# `TC` is newly selected above but not yet clean: 424 pre-existing findings across the tree
-#  (see `.plans/ruff/tc-baseline-2026-09-19.md`). This boundary lets new code get caught by
-#  `TC` immediately without failing on the backlog; each code is dropped from here as the
-#  matching cleanup lands, same pattern as `[tool.ty.rules]` below.
-ignore = [
-    "TC001", # typing-only-first-party-import (140 findings).
-    "TC003", # typing-only-standard-library-import (280 findings).
-    "TC006", # runtime-cast-value (4 findings).
-]
-
 [tool.ty.src]
 # `pyrogram/raw/{base,functions,types,all.py}` and `pyrogram/errors/exceptions` are
 #  written by `make api`; `pyrogram/raw/core` is hand-written and stays in scope. A CLI
