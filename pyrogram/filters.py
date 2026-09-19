@@ -20,9 +20,8 @@ from __future__ import annotations as _annotations
 
 import inspect
 import re
-from typing import Final
 from re import Pattern
-from collections.abc import Callable
+from typing import TYPE_CHECKING, Final
 
 import pyrogram
 from pyrogram import enums
@@ -49,6 +48,9 @@ from pyrogram.types import (
     Update,
     User,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class Filter:

@@ -27,13 +27,14 @@ import math
 import os
 from hashlib import md5
 from pathlib import PurePath
-from typing import BinaryIO, overload
-from collections.abc import Callable
+from typing import TYPE_CHECKING, BinaryIO, overload
 
 import pyrogram
-from pyrogram import StopTransmission
-from pyrogram import raw
+from pyrogram import StopTransmission, raw
 from pyrogram.session import Session
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 log = logging.getLogger(__name__)
 
