@@ -19,12 +19,14 @@
 from __future__ import annotations as _annotations
 
 import os
-from typing import BinaryIO
-from collections.abc import Callable
+from typing import TYPE_CHECKING, BinaryIO
 
 import pyrogram
-from pyrogram import raw, types, utils, StopTransmission
+from pyrogram import StopTransmission, raw, types, utils
 from pyrogram.errors import FilePartMissing
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class EditStoryMedia:
