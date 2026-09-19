@@ -18,13 +18,17 @@
 
 from __future__ import annotations as _annotations
 
-import asyncio
 import logging
 import os
 from struct import pack, unpack
+from typing import TYPE_CHECKING
 
-from pyrogram.connection.proxy import Proxy
 from pyrogram.connection.transport.tcp.tcp import INTERMEDIATE_PADDED_OBFUSCATE_TAG, TCP
+
+if TYPE_CHECKING:
+    import asyncio
+
+    from pyrogram.connection.proxy import Proxy
 
 log = logging.getLogger(__name__)
 
