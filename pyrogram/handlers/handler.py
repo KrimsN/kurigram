@@ -19,11 +19,14 @@
 from __future__ import annotations as _annotations
 
 import inspect
-from collections.abc import Callable
+from typing import TYPE_CHECKING
 
-import pyrogram
-from pyrogram.filters import Filter
-from pyrogram.types import Update
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    import pyrogram
+    from pyrogram.filters import Filter
+    from pyrogram.types import Update
 
 
 class Handler:
