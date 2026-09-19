@@ -18,9 +18,7 @@
 
 from __future__ import annotations as _annotations
 
-from datetime import datetime
-from typing import BinaryIO
-from collections.abc import Callable
+from typing import TYPE_CHECKING, BinaryIO
 
 import pyrogram
 from pyrogram import enums, raw, types, utils
@@ -28,6 +26,10 @@ from pyrogram.errors import ChannelInvalid, ChannelPrivate
 
 from ..object import Object
 from ..update import Update
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from datetime import datetime
 
 
 class Story(Object, Update):
