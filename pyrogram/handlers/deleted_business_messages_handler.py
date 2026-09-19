@@ -22,12 +22,12 @@ from typing import TYPE_CHECKING, Any
 from collections.abc import Callable
 
 from pyrogram import types
-from pyrogram.filters import Filter
 
 from .handler import Handler
 
 if TYPE_CHECKING:
     import pyrogram
+    from pyrogram.filters import Filter
 
 DeletedBusinessMessagesCallbackType = Callable[["pyrogram.Client", list[types.Message]], Any]
 
