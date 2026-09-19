@@ -22,9 +22,7 @@ import os
 from typing import BinaryIO
 
 import pyrogram
-from pyrogram import raw
-from pyrogram import utils
-from pyrogram import types
+from pyrogram import raw, types, utils
 from pyrogram.file_id import FileType
 
 
