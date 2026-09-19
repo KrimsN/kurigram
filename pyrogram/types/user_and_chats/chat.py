@@ -23,13 +23,14 @@ from typing import TYPE_CHECKING, BinaryIO
 
 import pyrogram
 from pyrogram import enums, raw, types, utils
-from pyrogram._typing import PathType
 
 from ..object import Object
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
     from datetime import datetime
+
+    from pyrogram._typing import PathType
 
 log = logging.getLogger(__name__)
 

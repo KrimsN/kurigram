@@ -26,7 +26,6 @@ from typing import TYPE_CHECKING, BinaryIO, SupportsIndex
 
 import pyrogram
 from pyrogram import enums, raw, types, utils
-from pyrogram._typing import PathType
 from pyrogram.errors import (
     ChannelForumMissing,
     ChannelInvalid,
@@ -44,6 +43,8 @@ if TYPE_CHECKING:
     from collections.abc import Callable
     from datetime import datetime
     from re import Match
+
+    from pyrogram._typing import PathType
 
 log = logging.getLogger(__name__)
 
