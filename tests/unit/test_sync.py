@@ -29,7 +29,6 @@ from __future__ import annotations as _annotations
 
 import asyncio
 import inspect
-import os
 import signal
 import subprocess
 import sys
@@ -389,7 +388,11 @@ def test_idle_called_from_sync_code_runs_on_the_loop_it_resolves_and_stops_on_a_
         while signal.getsignal(signal.SIGINT) is listening:
             time.sleep(0.01)
 
-        os.kill(os.getpid(), signal.SIGINT)
+        # `signal.raise_signal()` rather than `os.kill()`: on Windows `os.kill()` delivers a real
+        #  signal only for `CTRL_C_EVENT` and `CTRL_BREAK_EVENT`, and for anything else, `SIGINT`
+        #  included, it calls `TerminateProcess()` and ends `pytest` with the signal number as the
+        #  exit code.
+        signal.raise_signal(signal.SIGINT)
 
     interrupter = threading.Thread(
         target=interrupt_once_idle_is_listening,
