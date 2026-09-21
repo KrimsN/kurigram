@@ -45,6 +45,7 @@ if TYPE_CHECKING:
     from re import Match
 
     from pyrogram._typing import PathType
+    from pyrogram.types.messages_and_media.forum_topic_created import ForumTopicCreated
 
 log = logging.getLogger(__name__)
 
@@ -1381,7 +1382,7 @@ class Message(Object, Update):
             suggest_birthday = types.Birthday._parse(action.birthday)
         elif isinstance(action, raw.types.MessageActionTopicCreate):
             service_type = enums.MessageServiceType.FORUM_TOPIC_CREATED
-            forum_topic_created = types.ForumTopicCreated._parse(message)
+            forum_topic_created: ForumTopicCreated = types.ForumTopicCreated._parse(message)
         elif isinstance(action, raw.types.MessageActionTopicEdit):
             if action.hidden is True:
                 service_type = enums.MessageServiceType.GENERAL_FORUM_TOPIC_HIDDEN
@@ -1528,6 +1529,27 @@ class Message(Object, Update):
                 business_connection_id=business_connection_id,
                 raw_reply_to_message=raw_reply_to_message,
             )
+
+        if not parsed_message.topic:
+            parsed_topic = await client.topic_cache.get(
+                (parsed_message.chat.id, parsed_message.message_thread_id)
+            )
+
+            if parsed_topic:
+                parsed_message.topic = parsed_topic
+            elif client.fetch_topics and client.me and not client.me.is_bot:
+                try:
+                    parsed_message.topic = await client.get_forum_topics_by_id(
+                        chat_id=parsed_message.chat.id,
+                        topic_ids=parsed_message.message_thread_id or 1,
+                    )
+
+                    if parsed_message.topic:
+                        await client.topic_cache.set(
+                            (parsed_message.chat.id, parsed_message.topic.id), parsed_message.topic
+                        )
+                except (ChannelPrivate, ChannelForumMissing):
+                    pass
 
         if isinstance(action, raw.types.MessageActionGameScore):
             parsed_message.service = enums.MessageServiceType.GAME_HIGH_SCORE
@@ -2271,7 +2293,7 @@ class Message(Object, Update):
                 replies=replies,
             )
 
-        if not parsed_message.topic and parsed_message.chat.is_forum:
+        if not parsed_message.topic:
             parsed_topic = await client.topic_cache.get(
                 (parsed_message.chat.id, parsed_message.message_thread_id)
             )
