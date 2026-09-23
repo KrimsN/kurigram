@@ -37,7 +37,11 @@ from tests.guards.name_resolution import REPOSITORY_ROOT
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-_SWEPT: Final[tuple[str, ...]] = ("pyrogram/client.py", "pyrogram/dispatcher.py")
+_SWEPT: Final[tuple[str, ...]] = (
+    "pyrogram/client.py",
+    "pyrogram/dispatcher.py",
+    "pyrogram/utils/cache.py",
+)
 
 _LOOP_BOUND: Final[frozenset[str]] = frozenset({"Queue", "Event", "Lock", "Semaphore"})
 
