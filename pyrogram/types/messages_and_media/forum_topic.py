@@ -18,11 +18,15 @@
 
 from __future__ import annotations as _annotations
 
-from datetime import datetime
+from typing import TYPE_CHECKING
 
 import pyrogram
-from pyrogram import types, raw, utils
+from pyrogram import raw, types, utils
+
 from ..object import Object
+
+if TYPE_CHECKING:
+    from datetime import datetime
 
 
 class ForumTopic(Object):
@@ -131,7 +135,7 @@ class ForumTopic(Object):
         messages: dict | None = None,
         users: dict | None = None,
         chats: dict | None = None,
-    ) -> ForumTopic:
+    ) -> ForumTopic | None:
         if not forum_topic:
             return None
 
@@ -169,7 +173,7 @@ class ForumTopic(Object):
         message: raw.base.Message,
         users: dict[int, raw.base.User] | None = None,
         chats: dict[int, raw.base.Chat] | None = None,
-    ) -> ForumTopic:
+    ) -> ForumTopic | None:
         if chats is None:
             chats = {}
         if users is None:

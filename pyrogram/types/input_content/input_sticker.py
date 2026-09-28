@@ -22,14 +22,18 @@ import io
 import os
 import re
 from pathlib import Path
-from typing import BinaryIO
-from collections.abc import Callable
+from typing import TYPE_CHECKING, BinaryIO
 
 import pyrogram
-from pyrogram import raw, utils, enums, types
-from pyrogram._typing import PathType
+from pyrogram import enums, raw, types, utils
 from pyrogram.file_id import FileType
+
 from ..object import Object
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from pyrogram._typing import PathType
 
 
 class InputSticker(Object):
@@ -144,7 +148,7 @@ class InputSticker(Object):
         if isinstance(self.sticker, os.PathLike):
             raise FileNotFoundError(f"No such file or directory: {self.sticker}")
 
-        if re.match("^https?://", self.sticker):
+        if isinstance(self.sticker, str) and re.match("^https?://", self.sticker):
             # TODO: Add support for uploading stickers via URL
             # Maybe via urlib request 🤔🤔🤔
             raise ValueError("Stickers can't be uploaded via URL")

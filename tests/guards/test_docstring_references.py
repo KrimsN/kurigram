@@ -25,11 +25,10 @@ and carries on, so a dead reference looks almost right and nothing reports it.
 from __future__ import annotations as _annotations
 
 import ast
-import pathlib
 import re
-from typing import Final, NamedTuple
+from dataclasses import dataclass
 from re import Pattern
-from collections.abc import Iterator
+from typing import TYPE_CHECKING, Final
 
 from tests.guards.name_resolution import (
     REPOSITORY_ROOT,
@@ -37,6 +36,10 @@ from tests.guards.name_resolution import (
     resolves,
     source_of,
 )
+
+if TYPE_CHECKING:
+    import pathlib
+    from collections.abc import Iterator
 
 # `:obj:`Message`` and `:py:obj:`Message`` are the same role, the second one naming the
 #  domain the first one inherits.
@@ -57,7 +60,8 @@ _DOCUMENTED_NODES: Final[tuple[type, ...]] = (
 _LABEL_THAT_IS_A_PATH: Final[Pattern[str]] = re.compile(r"^[\w.]+(?:\(\))?$")
 
 
-class Reference(NamedTuple):
+@dataclass(frozen=True)
+class Reference:
     target: str
     path: pathlib.Path
     line: int
@@ -126,7 +130,13 @@ def hand_written_references() -> list[Reference]:
         for docstring, first_line in docstrings_of(path):
             for offset, line in enumerate(docstring.splitlines()):
                 for label, target in references_in(line):
-                    references.append(Reference(target, path, first_line + offset, label))
+                    reference = Reference(
+                        target=target,
+                        path=path,
+                        line=first_line + offset,
+                        label=label,
+                    )
+                    references.append(reference)
 
     return references
 

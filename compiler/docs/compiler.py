@@ -438,6 +438,7 @@ def pyrogram_api():
             set_upgraded_gift_colors
             update_chat_notifications
             create_folder_invite_link
+            edit_folder_invite_link
             get_chats_for_folder_invite_link
             get_folders
             create_folder
@@ -468,6 +469,7 @@ def pyrogram_api():
             get_chat_photos_count
             get_chat_audios_count
             set_profile_photo
+            set_bot_profile_photo
             set_personal_channel
             delete_profile_photos
             set_username
@@ -649,6 +651,7 @@ def pyrogram_api():
         Advanced
             invoke
             recover_gaps
+            get_app_config
             resolve_peer
             save_file
         """,
@@ -755,7 +758,7 @@ def pyrogram_api():
             ChatInviteLink
             ChatAdminWithInviteLinks
             ChatEvent
-            ChatEventFilter
+            ChatEventLogFilters
             ChatMemberUpdated
             ChatJoinRequest
             ChatJoinResult
@@ -789,6 +792,60 @@ def pyrogram_api():
             CommunityMemberStatusLeft
             CommunityMemberStatusBanned
             CommunityPermissions
+            ChatEventAction
+            ChatEventActionMessageEdited
+            ChatEventActionMessageDeleted
+            ChatEventActionMessagePinned
+            ChatEventActionMessageUnpinned
+            ChatEventActionPollStopped
+            ChatEventActionMemberJoined
+            ChatEventActionMemberJoinedByInviteLink
+            ChatEventActionMemberJoinedByRequest
+            ChatEventActionMemberInvited
+            ChatEventActionMemberLeft
+            ChatEventActionMemberPromoted
+            ChatEventActionMemberRestricted
+            ChatEventActionMemberTagChanged
+            ChatEventActionMemberSubscriptionExtended
+            ChatEventActionAvailableReactionsChanged
+            ChatEventActionBackgroundChanged
+            ChatEventActionDescriptionChanged
+            ChatEventActionEmojiStatusChanged
+            ChatEventActionLinkedChatChanged
+            ChatEventActionLocationChanged
+            ChatEventActionMessageAutoDeleteTimeChanged
+            ChatEventActionPermissionsChanged
+            ChatEventActionPhotoChanged
+            ChatEventActionSlowModeDelayChanged
+            ChatEventActionStickerSetChanged
+            ChatEventActionCustomEmojiStickerSetChanged
+            ChatEventActionTitleChanged
+            ChatEventActionUsernameChanged
+            ChatEventActionActiveUsernamesChanged
+            ChatEventActionAccentColorChanged
+            ChatEventActionProfileAccentColorChanged
+            ChatEventActionHasProtectedContentToggled
+            ChatEventActionInvitesToggled
+            ChatEventActionIsAllHistoryAvailableToggled
+            ChatEventActionHasAggressiveAntiSpamEnabledToggled
+            ChatEventActionSignMessagesToggled
+            ChatEventActionShowMessageSenderToggled
+            ChatEventActionAutomaticTranslationToggled
+            ChatEventActionInviteLinkEdited
+            ChatEventActionInviteLinkRevoked
+            ChatEventActionInviteLinkDeleted
+            ChatEventActionVideoChatCreated
+            ChatEventActionVideoChatEnded
+            ChatEventActionVideoChatMuteNewParticipantsToggled
+            ChatEventActionVideoChatParticipantIsMutedToggled
+            ChatEventActionVideoChatParticipantVolumeLevelChanged
+            ChatEventActionIsForumToggled
+            ChatEventActionForumTopicCreated
+            ChatEventActionForumTopicEdited
+            ChatEventActionForumTopicToggleIsClosed
+            ChatEventActionForumTopicToggleIsHidden
+            ChatEventActionForumTopicDeleted
+            ChatEventActionForumTopicPinned
         """,
         "messages_media": """
         Messages & Media
@@ -1441,7 +1498,7 @@ def pyrogram_api():
             BusinessSchedule
             ButtonStyle
             ChatAction
-            ChatEventAction
+            ChatEventActionType
             ChatJoinType
             ChatMemberStatus
             ChatMembersFilter

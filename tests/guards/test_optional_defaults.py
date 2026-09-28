@@ -20,8 +20,7 @@ from __future__ import annotations as _annotations
 
 import ast
 import pathlib
-from typing import Final
-from collections.abc import Iterator
+from typing import TYPE_CHECKING, Final
 
 from tests.guards.name_resolution import (
     REPOSITORY_ROOT,
@@ -29,6 +28,9 @@ from tests.guards.name_resolution import (
     is_generated,
     source_of,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 # A parameter annotated `Optional` and defaulting to something else says two things at once:
 #  the caller may pass `None`, and the caller who passes nothing does not get `None`. Almost
@@ -48,6 +50,14 @@ _EXEMPTIONS: Final[dict[tuple[str, str], str]] = {
         "pyrogram/types/messages_and_media/message.py",
         "reply_markup",
     ): "`object` is the not-specified sentinel, so `None` is free to mean remove the markup.",
+    (
+        "pyrogram/storage/storage.py",
+        "value",
+    ): "`object` is the not-specified sentinel, so `None` is free to mean clear the stored value.",
+    (
+        "pyrogram/storage/sqlite_storage.py",
+        "value",
+    ): "`object` is the not-specified sentinel, so `None` is free to mean clear the stored value.",
 }
 
 
