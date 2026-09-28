@@ -21,7 +21,6 @@ from __future__ import annotations as _annotations
 import json
 import re
 import shutil
-from functools import partial
 from pathlib import Path
 from typing import NamedTuple
 
@@ -50,9 +49,6 @@ WARNING = """
 # All changes made in this file will be lost! #
 # # # # # # # # # # # # # # # # # # # # # # # #
 """.strip()
-
-# noinspection PyShadowingBuiltins
-open = partial(open, encoding="utf-8")
 
 types_to_constructors = {}
 types_to_functions = {}
